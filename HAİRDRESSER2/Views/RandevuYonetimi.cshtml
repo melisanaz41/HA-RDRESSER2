@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Randevu Yönetimi";
+}
+
+<h2>Randevu Yönetimi</h2>
+<p>Burada randevuları yönetebilirsiniz.</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Randevu ID</th>
+            <th>Kullanıcı ID</th>
+            <th>Uzman ID</th>
+            <th>Tarih</th>
+            <th>Saat</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var randevu in Model)
+        {
+            <tr>
+                <td>@randevu.Id</td>
+                <td>@randevu.KullaniciId</td>
+                <td>@randevu.UzmanId</td>
+                <td>@randevu.Tarih.ToShortDateString()</td>
+                <td>@randevu.Saat</td>
+                <td>
+                    <a href="/Admin/RandevuDuzenle/@randevu.Id">Düzenle</a> |
+                    <a href="/Admin/RandevuSil/@randevu.Id">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

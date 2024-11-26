@@ -1,0 +1,33 @@
+﻿@{
+    ViewBag.Title = "Kullanıcı Yönetimi";
+}
+
+<h2>Kullanıcı Yönetimi</h2>
+<p>Burada kullanıcıları yönetebilirsiniz.</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Kullanıcı ID</th>
+            <th>Ad</th>
+            <th>Soyad</th>
+            <th>Email</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var kullanici in Model)
+        {
+            <tr>
+                <td>@kullanici.Id</td>
+                <td>@kullanici.Ad</td>
+                <td>@kullanici.Soyad</td>
+                <td>@kullanici.Email</td>
+                <td>
+                    <a href="/Admin/KullaniciDuzenle/@kullanici.Id">Düzenle</a> |
+                    <a href="/Admin/KullaniciSil/@kullanici.Id">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
