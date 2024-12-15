@@ -43,7 +43,7 @@ internal class Program
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
-
+        //deneme yapýlýyor
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
