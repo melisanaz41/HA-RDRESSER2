@@ -1,0 +1,11 @@
+﻿@model IEnumerable<HAIRDRESSER2.Models.Uzman>
+@{
+    ViewBag.Title = "Uzman Listesi";
+}
+<h2>Uzman Listesi</h2>
+<ul>
+    @foreach (var uzman in Model)
+    {
+        <li>@uzman.Ad @uzman.Soyad - @uzman.Branş</li>
+    }
+</ul>

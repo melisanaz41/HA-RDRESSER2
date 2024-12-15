@@ -1,0 +1,21 @@
+﻿@model LoginViewModel
+
+<h2>Kullanıcı Giriş</h2>
+<form method="post" asp-action="Login" asp-controller="Account">
+    <div>
+        <label for="Email">E-posta:</label>
+        <input type="email" id="Email" name="Email" required />
+    </div>
+    <div>
+        <label for="Password">Şifre:</label>
+        <input type="password" id="Password" name="Password" required />
+    </div>
+    <button type="submit">Giriş Yap</button>
+</form>
+
+<hr />
+
+<!-- Admin Login Yönlendirme -->
+<div>
+    <p>Admin misiniz? <a asp-action="Login" asp-controller="Admin">Buradan giriş yapın</a></p>
+</div>
