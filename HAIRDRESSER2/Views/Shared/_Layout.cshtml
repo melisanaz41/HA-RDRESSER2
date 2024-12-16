@@ -9,34 +9,56 @@
     <link rel="stylesheet" href="~/HAİRDRESSER2.styles.css" asp-append-version="true" />
     <style>
         body {
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            min-height: 100vh; /* Tüm ekran yüksekliğini kapla */
+            background-color: #f4f4f9; /* Genel arka plan için hafif gri */
+            font-family: Arial, sans-serif;
         }
 
         header {
             flex-shrink: 0;
+            background-color: #6d4c77; /* Header mor arka plan */
         }
 
-        .container {
-            flex: 1;
+            header .navbar-brand,
+            header .nav-link {
+                color: white !important; /* Header metinleri beyaz */
+            }
+
+                header .nav-link:hover {
+                    color: #d9c8df !important; /* Hover için açık lila */
+                }
+
+        .content-wrapper {
+            flex: 1; /* İçerik alanını esnek hale getir */
+            background-color: #f8e6f5; /* İçerik kısmı lila tonu */
+            padding: 30px;
+            border-radius: 10px; /* Köşeleri yuvarlat */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+            margin-bottom: 20px; /* Footer ile aralık bırak */
         }
 
         footer {
             flex-shrink: 0;
+            background-color: #6d4c77; /* Footer mor arka plan */
+            color: white;
+            padding: 10px;
         }
 
-        .content-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: calc(100vh - 120px); /* Header ve footer arasındaki alan */
-        }
+            footer a {
+                color: #d9c8df; /* Açık lila */
+            }
+
+                footer a:hover {
+                    color: white;
+                    text-decoration: none;
+                }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NAZELLA HAİRDRESSER</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -46,10 +68,19 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Randevu Oluştur</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">ANASAYFA</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Login">Admin Login</a>
+                            <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Login">Admin Login</a>
+                        </li>
+                    </ul>
+                    <!-- ÜYE OL ve GİRİŞ YAP butonları -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="/Account/Register" class="btn btn-primary me-2">ÜYE OL</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Account/Login" class="btn btn-secondary">GİRİŞ YAP</a>
                         </li>
                     </ul>
                 </div>
@@ -62,7 +93,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted text-center">
         <div class="container">
             &copy; 2024 - NAZELLA HAİRDRESSER - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

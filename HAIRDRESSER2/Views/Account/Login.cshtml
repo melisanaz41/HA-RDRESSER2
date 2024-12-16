@@ -1,0 +1,62 @@
+﻿@model HAIRDRESSER2.Models.LoginViewModel
+
+<style>
+    body {
+        background-color: #f8e6f5; /* Soft lila arka plan */
+        font-family: Arial, sans-serif;
+    }
+
+    h2 {
+        text-align: center;
+        color: #6d4c77; /* Soft yazı tonu */
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    form {
+        max-width: 400px;
+        margin: 50px auto;
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group label {
+        color: #6d4c77; /* Label yazı tonu */
+    }
+
+    .btn-primary {
+        background-color: #6d4c77;
+        border-color: #6d4c77;
+    }
+
+    .btn-primary:hover {
+        background-color: #5c3c65;
+        border-color: #5c3c65;
+    }
+
+    .text-danger {
+        color: #d9534f; /* Hata mesajları için kırmızı */
+    }
+</style>
+
+<h2>Giriş Yap</h2>
+
+<form asp-action="Login" method="post">
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" type="email" placeholder="E-posta adresinizi giriniz" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" type="password" placeholder="Şifrenizi giriniz" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -15,6 +15,48 @@ namespace HAIRDRESSER2.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                Ad = model.Ad,
+                Soyad = model.Soyad
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                // Varsayılan rol ekleme (opsiyonel)
+                await _userManager.AddToRoleAsync(user, "User");
+
+                // Kullanıcıyı giriş yaptıktan sonra yönlendir
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Index", "Home");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
+        }
+
 
         [HttpGet]
         public IActionResult Login()
