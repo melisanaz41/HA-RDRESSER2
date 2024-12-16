@@ -1,0 +1,8 @@
+﻿<h2>Admin Dashboard</h2>
+<p>Merhaba, @User.Identity.Name! Hoş geldiniz.</p>
+
+<a href="/Admin/UzmanListesi" class="btn btn-primary">Uzmanları Yönet</a>
+
+<form asp-action="Logout" method="post" style="margin-top: 20px;">
+    <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+</form>

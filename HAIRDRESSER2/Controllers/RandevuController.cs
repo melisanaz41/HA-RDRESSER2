@@ -19,7 +19,7 @@ namespace HAIRDRESSER2.Controllers
             db = context;
         }
 
-        // Randevu al
+
         public IActionResult RandevuAl(int uzmanId, DateTime tarih, TimeSpan saat)
         {
             // Geçerli kullanıcı kimliğini alıyoruz
@@ -44,7 +44,7 @@ namespace HAIRDRESSER2.Controllers
                     UzmanId = uzmanId,
                     Tarih = tarih,
                     Saat = saat,
-                    KullaniciId = int.Parse(kullaniciId) // KullaniciId'yi atıyoruz
+                    KullaniciId = kullaniciId // KullaniciId'yi string olarak atıyoruz
                 };
 
                 db.Randevular.Add(randevu);
@@ -55,5 +55,6 @@ namespace HAIRDRESSER2.Controllers
 
             return View("RandevuAlHata"); // Çalışma saatleri uygun değilse hata sayfası
         }
+
     }
 }

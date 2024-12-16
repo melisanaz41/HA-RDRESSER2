@@ -1,11 +1,12 @@
-﻿@model IEnumerable<HAIRDRESSER2.Models.Randevu> // Randevu modelini kullanıyoruz
+﻿@model IEnumerable<HAIRDRESSER2.Models.Randevu>
+
 @{
     ViewBag.Title = "Randevularım";
 }
 
 <h2>Randevularım</h2>
 
-<table>
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>Randevu ID</th>
@@ -15,7 +16,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (Model.Any())
+        @if (Model != null && Model.Any())
         {
             foreach (var randevu in Model)
             {
@@ -30,7 +31,7 @@
         else
         {
             <tr>
-                <td colspan="4">Hiç randevunuz yok.</td>
+                <td colspan="4" class="text-center">Hiç randevunuz yok.</td>
             </tr>
         }
     </tbody>

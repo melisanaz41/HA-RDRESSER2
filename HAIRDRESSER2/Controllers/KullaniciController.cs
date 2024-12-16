@@ -1,60 +1,57 @@
-﻿
-using HAIRDRESSER2.Models;
+﻿using HAIRDRESSER2.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
 
 namespace HAIRDRESSER2.Controllers
 {
-    [Authorize] // Sadece oturum açmış kullanıcıların erişebileceğini belirtir
+    [Authorize]
     public class KullaniciController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        // Constructor Injection kullanarak ApplicationDbContext'i alıyoruz
-        public KullaniciController(ApplicationDbContext db)
+        public KullaniciController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
         {
             _db = db;
+            _userManager = userManager;
         }
 
         // Kullanıcı profilini görüntüleme
         public IActionResult Profil()
         {
-            // Şu anki oturum açmış kullanıcının kimliğini alıyoruz
             var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(kullaniciId))
             {
-                return Unauthorized(); // Kullanıcı oturum açmamışsa yetkisiz hata döndür
+                return Unauthorized();
             }
 
-            // Kullanıcı bilgilerini veritabanından alıyoruz
-            var kullanici = _db.Kullanicilar.FirstOrDefault(k => k.Id == int.Parse(kullaniciId));
+            var kullanici = _userManager.Users.FirstOrDefault(u => u.Id == kullaniciId);
 
             if (kullanici == null)
             {
-                return NotFound(); // Kullanıcı bulunamazsa 404 döndür
+                return NotFound();
             }
 
-            return View(kullanici); // Profil bilgilerini döndür
+            return View(kullanici);
         }
 
         // Kullanıcının randevularını listeleme
         public IActionResult Randevularim()
         {
-            // Şu anki oturum açmış kullanıcının kimliğini alıyoruz
             var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(kullaniciId))
             {
-                return Unauthorized(); // Kullanıcı oturum açmamışsa yetkisiz hata döndür
+                return Unauthorized();
             }
 
-            // Kullanıcının randevularını alıyoruz
             var randevular = _db.Randevular
-                                .Where(r => r.KullaniciId == int.Parse(kullaniciId))
-                                .ToList();
+                .Where(r => r.KullaniciId == kullaniciId)
+                .ToList();
 
             return View(randevular);
         }
@@ -70,7 +67,7 @@ namespace HAIRDRESSER2.Controllers
                 return Unauthorized();
             }
 
-            var kullanici = _db.Kullanicilar.FirstOrDefault(k => k.Id == int.Parse(kullaniciId));
+            var kullanici = _userManager.Users.FirstOrDefault(u => u.Id == kullaniciId);
 
             if (kullanici == null)
             {
@@ -82,7 +79,8 @@ namespace HAIRDRESSER2.Controllers
 
         // Kullanıcı profilini düzenleme işlemi
         [HttpPost]
-        public IActionResult ProfilDuzenle(Kullanici model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProfilDuzenle(ApplicationUser model)
         {
             var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -91,22 +89,31 @@ namespace HAIRDRESSER2.Controllers
                 return Unauthorized();
             }
 
-            var kullanici = _db.Kullanicilar.FirstOrDefault(k => k.Id == int.Parse(kullaniciId));
+            var kullanici = await _userManager.FindByIdAsync(kullaniciId);
 
             if (kullanici == null)
             {
                 return NotFound();
             }
 
-            // Kullanıcı bilgilerini güncelleme
+            // Kullanıcı bilgilerini güncelle
             kullanici.Ad = model.Ad;
             kullanici.Soyad = model.Soyad;
             kullanici.Email = model.Email;
-            kullanici.Telefon = model.Telefon;
+            kullanici.PhoneNumber = model.PhoneNumber;
 
-            _db.SaveChanges(); // Veritabanında değişiklikleri kaydet
+            var result = await _userManager.UpdateAsync(kullanici);
 
-            return RedirectToAction("Profil"); // Güncelleme sonrası profil sayfasına yönlendir
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            return RedirectToAction("Profil");
         }
 
         protected override void Dispose(bool disposing)
@@ -119,4 +126,3 @@ namespace HAIRDRESSER2.Controllers
         }
     }
 }
-

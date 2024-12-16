@@ -1,52 +1,144 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using HAIRDRESSER2.Models;
-using Microsoft.AspNetCore.Authorization;  // ApplicationUser'ı doğru şekilde dahil ettiğinizden emin olun
+using Microsoft.AspNetCore.Authorization;
 
 namespace HAIRDRESSER2.Controllers
 {
+    [Authorize(Roles = "Admin")] // Sadece Admin rolü olanlar erişebilir
     public class AdminController : Controller
     {
+        private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly SignInManager<ApplicationUser> _signInManager; // Giriş işlemi için SignInManager ekleniyor
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-       
-        
-            // Admin login sayfası
-            public IActionResult Login()
+        public AdminController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        {
+            _db = db;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        // Admin Dashboard
+        public IActionResult AdminDashboard()
+        {
+            return View(); // Admin Dashboard görünümü
+        }
+
+        // Admin Logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Admin");
+        }
+
+        // Uzman Listesi
+        public IActionResult UzmanListesi()
+        {
+            var uzmanlar = _db.Uzmanlar.ToList();
+            return View(uzmanlar);
+        }
+
+        // Yeni Uzman Ekleme (GET)
+        [HttpGet]
+        public IActionResult UzmanEkle()
+        {
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList(); // Uzmanlık alanlarını ViewBag'e ekle
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UzmanEkle(Uzman uzman)
+        {
+            if (ModelState.IsValid)
             {
-                return View();
+                uzman.EklenmeTarihi = DateTime.Now;
+                _db.Uzmanlar.Add(uzman);
+                _db.SaveChanges();
+                return RedirectToAction("UzmanListesi");
             }
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList(); // Hata durumunda tekrar listeyi yükle
+            return View(uzman);
+        }
 
-            // Admin giriş işlemi
-            [HttpPost]
-            public async Task<IActionResult> Login(LoginViewModel model)
+        // Uzman Güncelleme (GET)
+        [HttpGet]
+        public IActionResult UzmanGuncelle(int id)
+        {
+            var uzman = _db.Uzmanlar.FirstOrDefault(u => u.Id == id);
+            if (uzman == null)
             {
-                if (ModelState.IsValid)
+                return NotFound();
+            }
+            return View(uzman);
+        }
+
+        // Uzman Güncelleme (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UzmanGuncelle(Uzman uzman)
+        {
+            if (ModelState.IsValid)
+            {
+                _db.Uzmanlar.Update(uzman);
+                _db.SaveChanges();
+                return RedirectToAction("UzmanListesi");
+            }
+            return View(uzman);
+        }
+
+        // Uzman Silme
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UzmanSil(int id)
+        {
+            var uzman = _db.Uzmanlar.FirstOrDefault(u => u.Id == id);
+            if (uzman != null)
+            {
+                _db.Uzmanlar.Remove(uzman);
+                _db.SaveChanges();
+            }
+            return RedirectToAction("UzmanListesi");
+        }
+
+        // Admin Login (GET)
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // Admin Login (POST)
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
-                    var user = await _userManager.FindByEmailAsync(model.Email);
-                    if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        // Admin kontrolü yapılabilir
-                        if (await _userManager.IsInRoleAsync(user, "Admin"))
-                        {
-                            // Admin girişini başarılı yap
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-                            return RedirectToAction("AdminDashboard", "Admin"); // Admin paneline yönlendir
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("", "Admin girişine izin verilmemektedir.");
-                        }
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("AdminDashboard", "Admin");
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Geçersiz giriş bilgileri.");
+                        ModelState.AddModelError("", "Admin girişine izin verilmemektedir.");
                     }
                 }
-                return View(model);
+                else
+                {
+                    ModelState.AddModelError("", "Geçersiz giriş bilgileri.");
+                }
             }
+            return View(model);
         }
     }
+}

@@ -8,6 +8,7 @@ namespace HAIRDRESSER2.Models
         public string Ad { get; set; }
         public string Soyad { get; set; }
 
+        public virtual ICollection<Randevu> Randevular { get; set; }
         // Diğer özelleştirilmiş özellikler
     }
 }

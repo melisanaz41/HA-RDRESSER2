@@ -1,0 +1,36 @@
+﻿@model IEnumerable<HAIRDRESSER2.Models.Uzman>
+
+<h2>Uzman Listesi</h2>
+<a asp-action="UzmanEkle" class="btn btn-primary">Yeni Uzman Ekle</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ad</th>
+            <th>Soyad</th>
+            <th>Uzmanlık Alanı</th>
+            <th>Telefon</th>
+            <th>Eklenme Tarihi</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var uzman in Model)
+        {
+            <tr>
+                <td>@uzman.Ad</td>dotnet ef database update
+
+                <td>@uzman.Soyad</td>
+                <td>@uzman.UzmanlikAlani?.Ad</td>
+                <td>@uzman.Telefon</td>
+                <td>@uzman.EklenmeTarihi.ToShortDateString()</td>
+                <td>
+                    <a asp-action="UzmanGuncelle" asp-route-id="@uzman.Id" class="btn btn-warning">Düzenle</a>
+                    <form asp-action="UzmanSil" asp-route-id="@uzman.Id" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
