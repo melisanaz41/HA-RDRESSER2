@@ -10,7 +10,7 @@ namespace HAIRDRESSER2.Models
         // Diğer tablolarınızı eklemek için DbSet özellikleri
         public DbSet<Uzman> Uzmanlar { get; set; }
         public DbSet<Randevu> Randevular { get; set; }
-        public DbSet<CalismaSaati> CalismaSaatleri { get; set; }
+        public DbSet<CalismaSaati> CalismaSaati { get; set; }
         public DbSet<UzmanlikAlani> UzmanlikAlanlari { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +33,28 @@ namespace HAIRDRESSER2.Models
                 new UzmanlikAlani { Id = 3, Ad = "Tırnak" },
                 new UzmanlikAlani { Id = 4, Ad = "Cilt Bakımı" });
 
+
+            modelBuilder.Entity<CalismaSaati>().HasData(
+       new CalismaSaati
+       {
+           Id = 1,
+           BaslangicSaati = new TimeSpan(8, 0, 0),  // Sabah 8
+           BitisSaati = new TimeSpan(13, 0, 0)      // Öğlen 1
+       },
+       new CalismaSaati
+       {
+           Id = 2,
+           BaslangicSaati = new TimeSpan(13, 0, 0), // Öğlen 1
+           BitisSaati = new TimeSpan(20, 0, 0)      // Akşam 8
+       },
+       new CalismaSaati
+       {
+           Id = 3,
+           BaslangicSaati = new TimeSpan(8, 0, 0),  // Sabah 8
+           BitisSaati = new TimeSpan(20, 0, 0)      // Akşam 8
+       }
+   );
         }
+
     }
-}
+    }

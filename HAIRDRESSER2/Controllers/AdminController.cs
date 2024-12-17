@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using HAIRDRESSER2.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace HAIRDRESSER2.Controllers
 {
@@ -22,22 +23,16 @@ namespace HAIRDRESSER2.Controllers
         // Admin Dashboard
         public IActionResult AdminDashboard()
         {
-            return View(); // Admin Dashboard görünümü
-        }
-
-        // Admin Logout
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Admin");
+            return View();
         }
 
         // Uzman Listesi
         public IActionResult UzmanListesi()
         {
-            var uzmanlar = _db.Uzmanlar.ToList();
+            var uzmanlar = _db.Uzmanlar
+                            .Include(u => u.UzmanlikAlani)
+                            .Include(u => u.CalismaSaati)
+                            .ToList();
             return View(uzmanlar);
         }
 
@@ -45,22 +40,32 @@ namespace HAIRDRESSER2.Controllers
         [HttpGet]
         public IActionResult UzmanEkle()
         {
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList(); // Uzmanlık alanlarını ViewBag'e ekle
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
+            ViewBag.CalismaSaatleri = _db.CalismaSaati
+                .Select(cs => new
+                {
+                    Id = cs.Id,
+                    SaatAraligi = $"{cs.BaslangicSaati} - {cs.BitisSaati}"
+                }).ToList();
+
             return View();
         }
 
+        // Yeni Uzman Ekleme (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UzmanEkle(Uzman uzman)
         {
             if (ModelState.IsValid)
             {
-                uzman.EklenmeTarihi = DateTime.Now;
+                uzman.EklenmeTarihi = DateTime.Now; // Eklenme tarihini otomatik ata
                 _db.Uzmanlar.Add(uzman);
                 _db.SaveChanges();
                 return RedirectToAction("UzmanListesi");
             }
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList(); // Hata durumunda tekrar listeyi yükle
+
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
+            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
             return View(uzman);
         }
 
@@ -68,11 +73,17 @@ namespace HAIRDRESSER2.Controllers
         [HttpGet]
         public IActionResult UzmanGuncelle(int id)
         {
-            var uzman = _db.Uzmanlar.FirstOrDefault(u => u.Id == id);
+            var uzman = _db.Uzmanlar
+                .Include(u => u.CalismaSaati)
+                .FirstOrDefault(u => u.Id == id);
+
             if (uzman == null)
             {
                 return NotFound();
             }
+
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
+            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
             return View(uzman);
         }
 
@@ -87,6 +98,9 @@ namespace HAIRDRESSER2.Controllers
                 _db.SaveChanges();
                 return RedirectToAction("UzmanListesi");
             }
+
+            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
+            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
             return View(uzman);
         }
 
@@ -95,13 +109,23 @@ namespace HAIRDRESSER2.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UzmanSil(int id)
         {
-            var uzman = _db.Uzmanlar.FirstOrDefault(u => u.Id == id);
+            var uzman = _db.Uzmanlar.Find(id);
             if (uzman != null)
             {
                 _db.Uzmanlar.Remove(uzman);
                 _db.SaveChanges();
             }
+
             return RedirectToAction("UzmanListesi");
+        }
+
+        // Admin Logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Admin");
         }
 
         // Admin Login (GET)
@@ -126,12 +150,10 @@ namespace HAIRDRESSER2.Controllers
                     if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("AdminDashboard", "Admin");
+                        return RedirectToAction("AdminDashboard");
                     }
-                    else
-                    {
-                        ModelState.AddModelError("", "Admin girişine izin verilmemektedir.");
-                    }
+
+                    ModelState.AddModelError("", "Admin yetkisi bulunmamaktadır.");
                 }
                 else
                 {

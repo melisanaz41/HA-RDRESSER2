@@ -1,29 +1,47 @@
 ﻿@model HAIRDRESSER2.Models.Uzman
 
-<h2>Yeni Uzman Ekle</h2>
+<h2 class="text-center mb-4">Yeni Uzman Ekle</h2>
 
 <form asp-action="UzmanEkle" method="post">
-    <div class="form-group">
-        <label asp-for="Ad"></label>
-        <input type="text" asp-for="Ad" class="form-control" />
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Ad" class="fw-bold">Ad</label>
+        <input type="text" asp-for="Ad" class="form-control" placeholder="Uzmanın adını giriniz" />
         <span asp-validation-for="Ad" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Soyad"></label>
-        <input type="text" asp-for="Soyad" class="form-control" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Soyad" class="fw-bold">Soyad</label>
+        <input type="text" asp-for="Soyad" class="form-control" placeholder="Uzmanın soyadını giriniz" />
         <span asp-validation-for="Soyad" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Telefon"></label>
-        <input type="text" asp-for="Telefon" class="form-control" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Telefon" class="fw-bold">Telefon</label>
+        <input type="tel" asp-for="Telefon" class="form-control" placeholder="Telefon numarasını giriniz" />
         <span asp-validation-for="Telefon" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label>Uzmanlık Alanı</label>
-        <select asp-for="UzmanlikAlaniId" class="form-control" asp-items="@(new SelectList(ViewBag.UzmanlikAlanlari, "Id", "Ad"))">
+
+    <div class="form-group mb-3">
+        <label asp-for="UzmanlikAlaniId" class="fw-bold">Uzmanlık Alanı</label>
+        <select asp-for="UzmanlikAlaniId" class="form-control" asp-items="@(ViewBag.UzmanlikAlanlari != null ? new SelectList(ViewBag.UzmanlikAlanlari, "Id", "Ad") : new SelectList(Enumerable.Empty<SelectListItem>()))">
             <option value="">Seçiniz</option>
         </select>
         <span asp-validation-for="UzmanlikAlaniId" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Kaydet</button>
+
+    <div class="form-group mb-3">
+        <label asp-for="CalismaSaatiId" class="fw-bold">Çalışma Saatleri</label>
+        <select asp-for="CalismaSaatiId" class="form-control" asp-items="@(ViewBag.CalismaSaatleri != null ? new SelectList(ViewBag.CalismaSaatleri, "Id", "SaatAraligi") : new SelectList(Enumerable.Empty<SelectListItem>()))">
+            <option value="">Seçiniz</option>
+        </select>
+        <span asp-validation-for="CalismaSaatiId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success w-100 mt-3">Kaydet</button>
 </form>
+
+<div class="text-center mt-3">
+    <a asp-action="UzmanListesi" class="btn btn-secondary">Geri Dön</a>
+</div>

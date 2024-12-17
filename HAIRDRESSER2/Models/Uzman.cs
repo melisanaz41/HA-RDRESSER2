@@ -9,7 +9,9 @@
         public UzmanlikAlani UzmanlikAlani { get; set; }
         public string Telefon { get; set; }
         public DateTime EklenmeTarihi { get; set; }
-        public virtual List<CalismaSaati> CalismaSaatleri { get; set; }
-        public virtual List<Randevu> Randevular { get; set; }
+       public int CalismaSaatiId { get; set; }
+        public CalismaSaati CalismaSaati{ get; set; }
+        
+       // public virtual List<Randevu> Randevular { get; set; }
     }
 }
