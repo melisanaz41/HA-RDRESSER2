@@ -37,7 +37,7 @@ namespace HAIRDRESSER2.Controllers
             }
 
             // Uzmanın çalışma saatlerini kontrol et
-            if (uzman.CalismaSaatleri.Any(s => s.Gun == tarih.DayOfWeek && s.BaslangicSaati <= saat && s.BitisSaati >= saat))
+            if (uzman.CalismaSaatleri.Any(s => s.BaslangicSaati <= saat && s.BitisSaati >= saat))
             {
                 var randevu = new Randevu
                 {
