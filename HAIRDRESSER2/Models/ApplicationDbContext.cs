@@ -10,7 +10,7 @@ namespace HAIRDRESSER2.Models
         // Diğer tablolarınızı eklemek için DbSet özellikleri
         public DbSet<Uzman> Uzmanlar { get; set; }
         public DbSet<Randevu> Randevular { get; set; }
-        public DbSet<CalismaSaati> CalismaSaatleri { get; set; }
+        public DbSet<CalismaSaati> CalismaSaati { get; set; }
         public DbSet<UzmanlikAlani> UzmanlikAlanlari { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -4,6 +4,7 @@ using HAIRDRESSER2.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HAIRDRESSER2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217133319_Updatebase")]
+    partial class Updatebase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,9 +179,6 @@ namespace HAIRDRESSER2.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CalismaSaatiId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("EklenmeTarihi")
                         .HasColumnType("datetime2");
 
@@ -193,11 +193,17 @@ namespace HAIRDRESSER2.Migrations
                     b.Property<int>("UzmanlikAlaniId")
                         .HasColumnType("int");
 
+                    b.Property<int>("calismaSaatleri")
+                        .HasColumnType("int");
+
+                    b.Property<int>("calismaSaatleriIdId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CalismaSaatiId");
-
                     b.HasIndex("UzmanlikAlaniId");
+
+                    b.HasIndex("calismaSaatleriIdId");
 
                     b.ToTable("Uzmanlar", (string)null);
                 });
@@ -395,21 +401,21 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
                 {
-                    b.HasOne("HAIRDRESSER2.Models.CalismaSaati", "CalismaSaati")
-                        .WithMany("Uzmanlar")
-                        .HasForeignKey("CalismaSaatiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("HAIRDRESSER2.Models.UzmanlikAlani", "UzmanlikAlani")
                         .WithMany("Uzmanlar")
                         .HasForeignKey("UzmanlikAlaniId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CalismaSaati");
+                    b.HasOne("HAIRDRESSER2.Models.CalismaSaati", "calismaSaatleriId")
+                        .WithMany()
+                        .HasForeignKey("calismaSaatleriIdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("UzmanlikAlani");
+
+                    b.Navigation("calismaSaatleriId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -466,11 +472,6 @@ namespace HAIRDRESSER2.Migrations
             modelBuilder.Entity("HAIRDRESSER2.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Randevular");
-                });
-
-            modelBuilder.Entity("HAIRDRESSER2.Models.CalismaSaati", b =>
-                {
-                    b.Navigation("Uzmanlar");
                 });
 
             modelBuilder.Entity("HAIRDRESSER2.Models.UzmanlikAlani", b =>

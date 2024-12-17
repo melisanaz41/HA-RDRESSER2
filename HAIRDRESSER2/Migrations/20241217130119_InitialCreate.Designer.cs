@@ -12,19 +12,20 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HAIRDRESSER2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241203163321_InitialCreate")]
+    [Migration("20241217130119_InitialCreate")]
     partial class InitialCreate
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.ApplicationUser", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -70,10 +71,6 @@ namespace HAIRDRESSER2.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -101,13 +98,13 @@ namespace HAIRDRESSER2.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.CalismaSaati", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.CalismaSaati", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<TimeSpan>("BaslangicSaati")
                         .HasColumnType("time");
@@ -115,69 +112,47 @@ namespace HAIRDRESSER2.Migrations
                     b.Property<TimeSpan>("BitisSaati")
                         .HasColumnType("time");
 
-                    b.Property<int>("Gun")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UzmanId")
+                    b.Property<int?>("UzmanId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UzmanId");
 
-                    b.ToTable("CalismaSaatleri");
+                    b.ToTable("CalismaSaatleri", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BaslangicSaati = new TimeSpan(0, 8, 0, 0, 0),
+                            BitisSaati = new TimeSpan(0, 13, 0, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BaslangicSaati = new TimeSpan(0, 13, 0, 0, 0),
+                            BitisSaati = new TimeSpan(0, 20, 0, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            BaslangicSaati = new TimeSpan(0, 8, 0, 0, 0),
+                            BitisSaati = new TimeSpan(0, 20, 0, 0, 0)
+                        });
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.Kullanici", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.Randevu", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Ad")
+                    b.Property<string>("KullaniciId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Soyad")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Telefon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Kullanicilar");
-                });
-
-            modelBuilder.Entity("HAİRDRESSER2.Models.Randevu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("KullaniciId")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<TimeSpan>("Saat")
                         .HasColumnType("time");
@@ -194,32 +169,79 @@ namespace HAIRDRESSER2.Migrations
 
                     b.HasIndex("UzmanId");
 
-                    b.ToTable("Randevular");
+                    b.ToTable("Randevular", (string)null);
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.Uzman", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Ad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Branş")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Soyad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Telefon")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UzmanlikAlaniId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Uzmanlar");
+                    b.HasIndex("UzmanlikAlaniId");
+
+                    b.ToTable("Uzmanlar", (string)null);
+                });
+
+            modelBuilder.Entity("HAIRDRESSER2.Models.UzmanlikAlani", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UzmanlikAlanlari");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Ad = "Saç"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Ad = "Makyaj"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Ad = "Tırnak"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Ad = "Cilt Bakımı"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -255,7 +277,7 @@ namespace HAIRDRESSER2.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -280,7 +302,7 @@ namespace HAIRDRESSER2.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -355,27 +377,23 @@ namespace HAIRDRESSER2.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.CalismaSaati", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.CalismaSaati", b =>
                 {
-                    b.HasOne("HAİRDRESSER2.Models.Uzman", "Uzman")
+                    b.HasOne("HAIRDRESSER2.Models.Uzman", null)
                         .WithMany("CalismaSaatleri")
-                        .HasForeignKey("UzmanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Uzman");
+                        .HasForeignKey("UzmanId");
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.Randevu", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.Randevu", b =>
                 {
-                    b.HasOne("HAİRDRESSER2.Models.Kullanici", "Kullanici")
+                    b.HasOne("HAIRDRESSER2.Models.ApplicationUser", "Kullanici")
                         .WithMany("Randevular")
                         .HasForeignKey("KullaniciId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HAİRDRESSER2.Models.Uzman", "Uzman")
-                        .WithMany("Randevular")
+                    b.HasOne("HAIRDRESSER2.Models.Uzman", "Uzman")
+                        .WithMany()
                         .HasForeignKey("UzmanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -383,6 +401,17 @@ namespace HAIRDRESSER2.Migrations
                     b.Navigation("Kullanici");
 
                     b.Navigation("Uzman");
+                });
+
+            modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
+                {
+                    b.HasOne("HAIRDRESSER2.Models.UzmanlikAlani", "UzmanlikAlani")
+                        .WithMany("Uzmanlar")
+                        .HasForeignKey("UzmanlikAlaniId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UzmanlikAlani");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -396,7 +425,7 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("HAİRDRESSER2.Models.ApplicationUser", null)
+                    b.HasOne("HAIRDRESSER2.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -405,7 +434,7 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("HAİRDRESSER2.Models.ApplicationUser", null)
+                    b.HasOne("HAIRDRESSER2.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -420,7 +449,7 @@ namespace HAIRDRESSER2.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HAİRDRESSER2.Models.ApplicationUser", null)
+                    b.HasOne("HAIRDRESSER2.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -429,23 +458,26 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("HAİRDRESSER2.Models.ApplicationUser", null)
+                    b.HasOne("HAIRDRESSER2.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.Kullanici", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Randevular");
                 });
 
-            modelBuilder.Entity("HAİRDRESSER2.Models.Uzman", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
                 {
                     b.Navigation("CalismaSaatleri");
+                });
 
-                    b.Navigation("Randevular");
+            modelBuilder.Entity("HAIRDRESSER2.Models.UzmanlikAlani", b =>
+                {
+                    b.Navigation("Uzmanlar");
                 });
 #pragma warning restore 612, 618
         }

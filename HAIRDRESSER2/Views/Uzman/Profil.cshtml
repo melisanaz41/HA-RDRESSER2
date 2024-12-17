@@ -1,0 +1,25 @@
+﻿@model HAIRDRESSER2.Models.Uzman
+
+<h2>Uzman Profili</h2>
+
+<div>
+    <h3>Uzman Bilgileri</h3>
+    <p><strong>Ad:</strong> @Model.Ad</p>
+    <p><strong>Soyad:</strong> @Model.Soyad</p>
+    <p><strong>Uzmanlık Alanı:</strong> @(Model.UzmanlikAlani != null ? Model.UzmanlikAlani.Ad : "Bilinmiyor")</p>
+    <p><strong>Telefon:</strong> @Model.Telefon</p>
+    <p><strong>Eklenme Tarihi:</strong> @Model.EklenmeTarihi.ToShortDateString()</p>
+</div>
+
+<div>
+    <h3>Çalışma Saatleri</h3>
+    @if (Model.CalismaSaati != null)
+    {
+        <p><strong>Başlangıç Saati:</strong> @Model.CalismaSaati.BaslangicSaati.ToString(@"hh\:mm")</p>
+        <p><strong>Bitiş Saati:</strong> @Model.CalismaSaati.BitisSaati.ToString(@"hh\:mm")</p>
+    }
+    else
+    {
+        <p>Çalışma saati bilgisi mevcut değil.</p>
+    }
+</div>
