@@ -45,6 +45,7 @@ internal class Program
         app.UseAuthentication(); // Kullanýcý kimlik doðrulamasý
         app.UseAuthorization();  // Kullanýcý yetkilendirmesi
 
+        // Tek bir default route
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -102,7 +103,7 @@ internal class Program
     private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
     {
         string adminEmail = "admin@example.com";
-        string adminPassword = "Admin123!"; // Güçlü bir þifre kullandýðýnýzdan emin olun
+        string adminPassword = "Admin123!"; // Þifre
 
         // Admin kullanýcýsýný kontrol et
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
@@ -113,16 +114,14 @@ internal class Program
             {
                 UserName = adminEmail,
                 Email = adminEmail,
-                Ad = "Admin",
-                Soyad = "User",
-                PhoneNumber = "1234567890" // Opsiyonel telefon numarasý
+                Ad = "Admin", // ApplicationUser modelinizde varsa
+                Soyad = "User", // ApplicationUser modelinizde varsa
+                PhoneNumber = "1234567890"
             };
 
-            // Kullanýcý oluþtur ve þifre ata
             var result = await userManager.CreateAsync(adminUser, adminPassword);
             if (result.Succeeded)
             {
-                // Admin rolünü ata
                 await userManager.AddToRoleAsync(adminUser, "Admin");
                 Console.WriteLine("Admin kullanýcý baþarýyla oluþturuldu.");
             }

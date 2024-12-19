@@ -4,6 +4,7 @@ using HAIRDRESSER2.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HAIRDRESSER2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217160057_YeniMigration")]
+    partial class YeniMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,12 +235,12 @@ namespace HAIRDRESSER2.Migrations
                         new
                         {
                             Id = 3,
-                            Ad = "Tirnak"
+                            Ad = "Tırnak"
                         },
                         new
                         {
                             Id = 4,
-                            Ad = "Cilt Bakimi"
+                            Ad = "Cilt Bakımı"
                         },
                         new
                         {

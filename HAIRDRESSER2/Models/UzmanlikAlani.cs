@@ -8,6 +8,6 @@ namespace HAIRDRESSER2.Models
         public string Ad { get; set; } // Uzmanlık alanı adı (örn: Saç, Makyaj)
 
         // İlişki: Bir uzmanlık alanına birden fazla uzman bağlanabilir
-        public virtual ICollection<Uzman> Uzmanlar { get; set; }
+        public virtual  ICollection<Uzman> Uzmanlar { get; set; }
     }
 }
