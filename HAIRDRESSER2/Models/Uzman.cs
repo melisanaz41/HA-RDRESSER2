@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace HAIRDRESSER2.Models
 {
     public class Uzman
-    {
+    { // namespace alanı düzenlendi
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Ad alanı gereklidir.")]
