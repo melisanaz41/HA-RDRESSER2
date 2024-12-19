@@ -89,7 +89,7 @@ namespace HAIRDRESSER2.Controllers
             {
                 return View(model);
             }
-
+            //Kullanıcı kontrol
             // Kullanıcıyı email ile bul
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)

@@ -85,6 +85,7 @@ namespace HAIRDRESSER2.Controllers
         }
 
         // Onay Sayfası
+        //
         public IActionResult Onay(int id)
         {
             var randevu = db.Randevular

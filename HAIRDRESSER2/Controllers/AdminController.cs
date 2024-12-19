@@ -36,7 +36,7 @@ namespace HAIRDRESSER2.Controllers
             return View(uzmanlar);
         }
 
-        // Yeni Uzman Ekleme (GET)
+        //Uzman Ekleme  (GET)
         [HttpGet]
         public IActionResult UzmanEkle()
         {
