@@ -17,7 +17,7 @@ namespace HAIRDRESSER2.Controllers
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
-
+         
         // GET: Register
         [HttpGet]
         [AllowAnonymous]
@@ -48,7 +48,7 @@ namespace HAIRDRESSER2.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                // "User" rolünü kontrol edip yoksa oluşturuyoruz
+                // "User" rolünü kontrol edip yoksa oluşturuyoruz kontrol
                 if (!await _roleManager.RoleExistsAsync("User"))
                 {
                     await _roleManager.CreateAsync(new IdentityRole("User"));
@@ -89,7 +89,7 @@ namespace HAIRDRESSER2.Controllers
             {
                 return View(model);
             }
-
+            //Kullanıcı kontrol
             // Kullanıcıyı email ile bul
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
