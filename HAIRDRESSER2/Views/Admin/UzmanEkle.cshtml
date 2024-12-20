@@ -1,4 +1,4 @@
-﻿@model HAIRDRESSER2.Models.Uzman
+﻿@model HAIRDRESSER2.Models.UzmanViewModel
 
 <h2 class="text-center mb-4">Yeni Uzman Ekle</h2>
 
@@ -8,43 +8,42 @@
 
     <!-- Ad Alanı -->
     <div class="form-group mb-3">
-        <label asp-for="Ad" class="fw-bold">Ad</label>
-        <input type="text" asp-for="Ad" class="form-control" placeholder="Uzmanın adını giriniz" required />
-        <span asp-validation-for="Ad" class="text-danger"></span>
+        <label asp-for="Uzman.Ad" class="fw-bold">Ad</label>
+        <input type="text" asp-for="Uzman.Ad" class="form-control" placeholder="Uzmanın adını giriniz" required />
+        <span asp-validation-for="Uzman.Ad" class="text-danger"></span>
     </div>
 
     <!-- Soyad Alanı -->
     <div class="form-group mb-3">
-        <label asp-for="Soyad" class="fw-bold">Soyad</label>
-        <input type="text" asp-for="Soyad" class="form-control" placeholder="Uzmanın soyadını giriniz" required />
-        <span asp-validation-for="Soyad" class="text-danger"></span>
+        <label asp-for="Uzman.Soyad" class="fw-bold">Soyad</label>
+        <input type="text" asp-for="Uzman.Soyad" class="form-control" placeholder="Uzmanın soyadını giriniz" required />
+        <span asp-validation-for="Uzman.Soyad" class="text-danger"></span>
     </div>
 
     <!-- Telefon Alanı -->
     <div class="form-group mb-3">
-        <label asp-for="Telefon" class="fw-bold">Telefon</label>
-        <input type="tel" asp-for="Telefon" class="form-control" placeholder="Telefon numarasını giriniz" required />
-        <span asp-validation-for="Telefon" class="text-danger"></span>
+        <label asp-for="Uzman.Telefon" class="fw-bold">Telefon</label>
+        <input type="tel" asp-for="Uzman.Telefon" class="form-control" placeholder="Telefon numarasını giriniz" required />
+        <span asp-validation-for="Uzman.Telefon" class="text-danger"></span>
     </div>
+
     <!-- Uzmanlık Alanı Dropdown -->
     <div class="form-group">
-        <label for="UzmanlikAlaniId">Uzmanlık Alanı</label>
-        <select asp-for="UzmanlikAlaniId" asp-items="ViewBag.UzmanlikAlanlari" class="form-control">
+        <label asp-for="Uzman.UzmanlikAlaniId" class="fw-bold">Uzmanlık Alanı</label>
+        <select asp-for="Uzman.UzmanlikAlaniId" asp-items="Model.UzmanlikAlanlari" class="form-control">
             <option value="0">Seçiniz</option>
         </select>
-        <span asp-validation-for="UzmanlikAlaniId" class="text-danger"></span>
+        <span asp-validation-for="Uzman.UzmanlikAlaniId" class="text-danger"></span>
     </div>
 
+    <!-- Çalışma Saati Dropdown -->
     <div class="form-group">
-        <label for="CalismaSaatiId">Çalışma Saati</label>
-        <select asp-for="CalismaSaatiId" asp-items="ViewBag.CalismaSaatleri" class="form-control">
+        <label asp-for="Uzman.CalismaSaatiId" class="fw-bold">Çalışma Saati</label>
+        <select asp-for="Uzman.CalismaSaatiId" asp-items="Model.CalismaSaatleri" class="form-control">
             <option value="0">Seçiniz</option>
         </select>
-        <span asp-validation-for="CalismaSaatiId" class="text-danger"></span>
+        <span asp-validation-for="Uzman.CalismaSaatiId" class="text-danger"></span>
     </div>
-
-    
-
 
     <!-- Kaydet Butonu -->
     <button type="submit" class="btn btn-success w-100 mt-3">Kaydet</button>

@@ -17,17 +17,21 @@ namespace HAIRDRESSER2.Models
         public string Telefon { get; set; }
         //uzman modeli düzeltildi
         [Required(ErrorMessage = "Uzmanlık alanı seçilmelidir.")]
-        [ForeignKey("UzmanlikAlani")]
-       // [Range(1, int.MaxValue, ErrorMessage = "Uzmanlık alanı seçilmelidir.")]
+
+        // [Range(1, int.MaxValue, ErrorMessage = "Uzmanlık alanı seçilmelidir.")]
+
+      
         public int UzmanlikAlaniId { get; set; }
 
+        [ForeignKey("UzmanlikAlaniId")]
         public UzmanlikAlani UzmanlikAlani { get; set; }
 
         [Required(ErrorMessage = "Çalışma saati seçilmelidir.")]
-        [ForeignKey("CalismaSaati")]
-     //   [Range(1, int.MaxValue, ErrorMessage = "Çalışma saati seçilmelidir.")]
-        public int CalismaSaatiId { get; set; }
 
+        //   [Range(1, int.MaxValue, ErrorMessage = "Çalışma saati seçilmelidir.")]
+    
+        public int CalismaSaatiId { get; set; }
+        [ForeignKey("CalismaSaatiId")]
         public CalismaSaati CalismaSaati { get; set; }
 
         public DateTime EklenmeTarihi { get; set; }
