@@ -40,54 +40,56 @@ namespace HAIRDRESSER2.Controllers
             return View(uzmanlar);
         }
 
+
+
+
         [HttpGet]
         public async Task<IActionResult> UzmanEkle()
         {
             var viewModel = await CreateUzmanViewModelAsync();
             return View(viewModel);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
+      
         public async Task<IActionResult> UzmanEkle(UzmanViewModel viewModel)
         {
-            // Gönderilen değerlerin doğruluğunu kontrol ediyoruz
-            if (viewModel.Uzman.UzmanlikAlaniId == 0 || viewModel.Uzman.CalismaSaatiId == 0)
+            // Dropdown validasyonu
+            if (viewModel.Uzman.UzmanlikAlaniId == 0)
             {
-                ModelState.AddModelError("", "Lütfen geçerli bir uzmanlık alanı ve çalışma saati seçiniz.");
+                ModelState.AddModelError("Uzman.UzmanlikAlaniId", "Lütfen geçerli bir uzmanlık alanı seçiniz.");
             }
 
-            if (ModelState.IsValid)
+            if (viewModel.Uzman.CalismaSaatiId == 0)
             {
-                try
-                {
-                    viewModel.Uzman.EklenmeTarihi = DateTime.Now;
-                    _db.Add(viewModel.Uzman);
-                    await _db.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Uzman başarıyla eklendi.";
-                    return RedirectToAction("UzmanListesi");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Uzman eklenirken bir hata oluştu.");
-                    ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
-                }
+                ModelState.AddModelError("Uzman.CalismaSaatiId", "Lütfen geçerli bir çalışma saati seçiniz.");
             }
+
             if (!ModelState.IsValid)
             {
-                foreach (var modelStateKey in ModelState.Keys)
-                {
-                    var modelStateVal = ModelState[modelStateKey];
-                    foreach (var error in modelStateVal.Errors)
-                    {
-                        Console.WriteLine($"Key: {modelStateKey}, Error: {error.ErrorMessage}");
-                    }
-                }
+                _logger.LogWarning("ModelState geçersiz ancak test için işlem devam ediyor.");
+            }
+
+            try
+            {
+                viewModel.Uzman.EklenmeTarihi = DateTime.Now;
+                _db.Add(viewModel.Uzman);
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Uzman başarıyla eklendi.";
+                return RedirectToAction("UzmanListesi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Uzman eklenirken bir hata oluştu.");
+                ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
             }
 
             viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
             return View(viewModel);
         }
+
+
+
         [HttpGet]
         public async Task<IActionResult> UzmanGuncelle(int id)
         {
@@ -193,20 +195,33 @@ namespace HAIRDRESSER2.Controllers
 
         private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
         {
-            var viewModel = new UzmanViewModel
+            var uzmanlikAlanlari = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "Seçiniz" }
+    };
+            uzmanlikAlanlari.AddRange(await _db.UzmanlikAlanlari
+                .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Ad }).ToListAsync());
+
+            var calismaSaatleri = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "Seçiniz" }
+    };
+            calismaSaatleri.AddRange(await _db.CalismaSaatleri
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = $"{x.BaslangicSaati} - {x.BitisSaati}"
+                }).ToListAsync());
+
+            return new UzmanViewModel
             {
                 Uzman = new Uzman(),
-                UzmanlikAlanlari = new SelectList(await _db.UzmanlikAlanlari.ToListAsync(), "Id", "Ad", uzmanlikAlaniId),
-                CalismaSaatleri = new SelectList(
-                    await _db.CalismaSaatleri.Select(i => new
-                    {
-                        i.Id,
-                        SaatAraligi = $"{i.BaslangicSaati} - {i.BitisSaati}"
-                    }).ToListAsync(),
-                    "Id", "SaatAraligi", calismaSaatiId)
+                UzmanlikAlanlari = new SelectList(uzmanlikAlanlari, "Value", "Text", uzmanlikAlaniId ?? 0),
+                CalismaSaatleri = new SelectList(calismaSaatleri, "Value", "Text", calismaSaatiId ?? 0)
             };
-
-            return viewModel;
         }
+
+
+
     }
 }

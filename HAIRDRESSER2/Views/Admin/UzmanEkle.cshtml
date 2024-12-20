@@ -26,25 +26,18 @@
         <input type="tel" asp-for="Uzman.Telefon" class="form-control" placeholder="Telefon numarasını giriniz" required />
         <span asp-validation-for="Uzman.Telefon" class="text-danger"></span>
     </div>
-
+    <!-- Uzmanlık Alanı -->
     <!-- Uzmanlık Alanı Dropdown -->
     <div class="form-group">
         <label asp-for="Uzman.UzmanlikAlaniId" class="fw-bold">Uzmanlık Alanı</label>
-        <select asp-for="Uzman.UzmanlikAlaniId" asp-items="Model.UzmanlikAlanlari" class="form-control">
-            <option value="0">Seçiniz</option>
-        </select>
+        <select asp-for="Uzman.UzmanlikAlaniId" asp-items="Model.UzmanlikAlanlari" class="form-control"></select>
         <span asp-validation-for="Uzman.UzmanlikAlaniId" class="text-danger"></span>
     </div>
-
-    <!-- Çalışma Saati Dropdown -->
     <div class="form-group">
         <label asp-for="Uzman.CalismaSaatiId" class="fw-bold">Çalışma Saati</label>
-        <select asp-for="Uzman.CalismaSaatiId" asp-items="Model.CalismaSaatleri" class="form-control">
-            <option value="0">Seçiniz</option>
-        </select>
+        <select asp-for="Uzman.CalismaSaatiId" asp-items="Model.CalismaSaatleri" class="form-control"></select>
         <span asp-validation-for="Uzman.CalismaSaatiId" class="text-danger"></span>
     </div>
-
     <!-- Kaydet Butonu -->
     <button type="submit" class="btn btn-success w-100 mt-3">Kaydet</button>
 </form>
