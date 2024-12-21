@@ -26,6 +26,8 @@ namespace HAIRDRESSER2.Models
         [ForeignKey("UzmanlikAlaniId")]
         public UzmanlikAlani UzmanlikAlani { get; set; }
 
+        // gşthub deneme işlemleri 
+
         [Required(ErrorMessage = "Çalışma saati seçilmelidir.")]
 
         //   [Range(1, int.MaxValue, ErrorMessage = "Çalışma saati seçilmelidir.")]
