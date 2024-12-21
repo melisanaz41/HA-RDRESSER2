@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace HAIRDRESSER2.Controllers
 {
     public class AccountController : Controller
-    {
+    { 
+        /// <summary>
+        /// kdjfgk
+        /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager; // Rol yönetimi için eklendi

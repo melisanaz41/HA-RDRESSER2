@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HAIRDRESSER2.Controllers
 {
+
     [Authorize] // Bu controller'a yalnızca oturum açmış kullanıcılar erişebilir
     public class RandevuController : Controller
     {
+        //kdhıwq
         private readonly ApplicationDbContext db;
 
         // Dependency Injection ile ApplicationDbContext'i alıyoruz
