@@ -9,5 +9,6 @@ namespace HAIRDRESSER2.Models
 
         // İlişki: Bir uzmanlık alanına birden fazla uzman bağlanabilir
         public virtual  ICollection<Uzman> Uzmanlar { get; set; }
+        public virtual ICollection<Islem> Islemler { get; set; }
     }
 }

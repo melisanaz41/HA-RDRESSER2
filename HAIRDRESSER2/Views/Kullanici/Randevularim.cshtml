@@ -4,15 +4,17 @@
     ViewBag.Title = "Randevularım";
 }
 
-<h2>Randevularım</h2>
+<h2 class="mb-4">Randevularım</h2>
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Randevu ID</th>
-            <th>Uzman ID</th>
+            <th>Uzman</th>
+            <th>İşlem</th>
             <th>Tarih</th>
             <th>Saat</th>
+            <th>Ücret</th>
         </tr>
     </thead>
     <tbody>
@@ -22,16 +24,18 @@
             {
                 <tr>
                     <td>@randevu.Id</td>
-                    <td>@randevu.UzmanId</td>
+                    <td>@randevu.Uzman.Ad @randevu.Uzman.Soyad</td>
+                    <td>@randevu.Islem.Ad</td>
                     <td>@randevu.Tarih.ToShortDateString()</td>
                     <td>@randevu.Saat</td>
+                    <td>@randevu.Ucret.ToString("C")</td>
                 </tr>
             }
         }
         else
         {
             <tr>
-                <td colspan="4" class="text-center">Hiç randevunuz yok.</td>
+                <td colspan="6" class="text-center">Hiç randevunuz yok. Yeni bir randevu almak için <a asp-action="RandevuAl" asp-controller="Randevu">buraya tıklayın</a>.</td>
             </tr>
         }
     </tbody>

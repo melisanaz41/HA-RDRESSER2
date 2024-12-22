@@ -3,7 +3,6 @@
 <h2 class="text-center mb-4">Yeni Uzman Ekle</h2>
 
 <form asp-action="UzmanEkle" method="post">
-    <!-- Genel hata mesajlarını gösteren kısım -->
     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
     <!-- Ad Alanı -->
@@ -26,23 +25,53 @@
         <input type="tel" asp-for="Uzman.Telefon" class="form-control" placeholder="Telefon numarasını giriniz" required />
         <span asp-validation-for="Uzman.Telefon" class="text-danger"></span>
     </div>
-    <!-- Uzmanlık Alanı -->
+
     <!-- Uzmanlık Alanı Dropdown -->
     <div class="form-group">
         <label asp-for="Uzman.UzmanlikAlaniId" class="fw-bold">Uzmanlık Alanı</label>
-        <select asp-for="Uzman.UzmanlikAlaniId" asp-items="Model.UzmanlikAlanlari" class="form-control"></select>
+        <select asp-for="Uzman.UzmanlikAlaniId" asp-items="Model.UzmanlikAlanlari" class="form-control" id="uzmanlikAlaniDropdown" onchange="showIslemler()"></select>
         <span asp-validation-for="Uzman.UzmanlikAlaniId" class="text-danger"></span>
     </div>
+
+    <!-- Çalışma Saati Dropdown -->
     <div class="form-group">
         <label asp-for="Uzman.CalismaSaatiId" class="fw-bold">Çalışma Saati</label>
         <select asp-for="Uzman.CalismaSaatiId" asp-items="Model.CalismaSaatleri" class="form-control"></select>
         <span asp-validation-for="Uzman.CalismaSaatiId" class="text-danger"></span>
     </div>
-    <!-- Kaydet Butonu -->
+
+    <!-- İşlemler Listesi -->
+    <div class="form-group mt-4">
+        <label class="fw-bold">İşlemler</label>
+        <ul id="islemlerListesi" class="list-group">
+            <!-- İşlemler dinamik olarak buraya eklenecek -->
+        </ul>
+    </div>
+
     <button type="submit" class="btn btn-success w-100 mt-3">Kaydet</button>
 </form>
 
-<!-- Geri Dön Butonu -->
 <div class="text-center mt-3">
     <a asp-action="UzmanListesi" class="btn btn-secondary">Geri Dön</a>
 </div>
+
+<script>
+    async function showIslemler() {
+        const uzmanlikAlaniId = document.getElementById('uzmanlikAlaniDropdown').value;
+        const islemlerListesi = document.getElementById('islemlerListesi');
+
+        islemlerListesi.innerHTML = ''; // Temizle
+
+        if (uzmanlikAlaniId > 0) {
+            const response = await fetch(`/Admin/GetIslemlerByUzmanlikAlani/${uzmanlikAlaniId}`);
+            const islemler = await response.json();
+
+            islemler.forEach(islem => {
+                const li = document.createElement('li');
+                li.textContent = `${islem.ad} - ${islem.fiyat} TL (${islem.sure} dakika)`;
+                li.classList.add('list-group-item');
+                islemlerListesi.appendChild(li);
+            });
+        }
+    }
+</script>

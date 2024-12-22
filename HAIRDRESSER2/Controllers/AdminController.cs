@@ -39,22 +39,26 @@ namespace HAIRDRESSER2.Controllers
                                    .ToListAsync();
             return View(uzmanlar);
         }
-
-
-
-
+        [HttpGet]
+public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
+{
+    var islemler = await _db.Islemler
+                           .Where(i => i.UzmanlikAlaniId == id)
+                           .Select(i => new { i.Ad, i.Fiyat, i.Sure })
+                           .ToListAsync();
+    return Json(islemler);
+}
         [HttpGet]
         public async Task<IActionResult> UzmanEkle()
         {
             var viewModel = await CreateUzmanViewModelAsync();
             return View(viewModel);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-      
         public async Task<IActionResult> UzmanEkle(UzmanViewModel viewModel)
         {
-            // Dropdown validasyonu
             if (viewModel.Uzman.UzmanlikAlaniId == 0)
             {
                 ModelState.AddModelError("Uzman.UzmanlikAlaniId", "Lütfen geçerli bir uzmanlık alanı seçiniz.");
@@ -74,6 +78,14 @@ namespace HAIRDRESSER2.Controllers
             {
                 viewModel.Uzman.EklenmeTarihi = DateTime.Now;
                 _db.Add(viewModel.Uzman);
+
+                // Uzmanlık alanına ait işlemleri ekle
+                var islemler = await _db.Islemler
+                                        .Where(i => i.UzmanlikAlaniId == viewModel.Uzman.UzmanlikAlaniId)
+                                        .ToListAsync();
+
+                viewModel.Uzman.Islemler = islemler;
+
                 await _db.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Uzman başarıyla eklendi.";
                 return RedirectToAction("UzmanListesi");
@@ -87,8 +99,6 @@ namespace HAIRDRESSER2.Controllers
             viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
             return View(viewModel);
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> UzmanGuncelle(int id)
@@ -117,6 +127,14 @@ namespace HAIRDRESSER2.Controllers
                 try
                 {
                     _db.Uzmanlar.Update(viewModel.Uzman);
+
+                    // Uzmanlık alanına ait işlemleri güncelle
+                    var islemler = await _db.Islemler
+                                            .Where(i => i.UzmanlikAlaniId == viewModel.Uzman.UzmanlikAlaniId)
+                                            .ToListAsync();
+
+                    viewModel.Uzman.Islemler = islemler;
+
                     await _db.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Uzman başarıyla güncellendi.";
                     return RedirectToAction("UzmanListesi");
@@ -192,7 +210,6 @@ namespace HAIRDRESSER2.Controllers
             return View(model);
         }
 
-
         private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
         {
             var uzmanlikAlanlari = new List<SelectListItem>
@@ -220,8 +237,5 @@ namespace HAIRDRESSER2.Controllers
                 CalismaSaatleri = new SelectList(calismaSaatleri, "Value", "Text", calismaSaatiId ?? 0)
             };
         }
-
-
-
     }
 }

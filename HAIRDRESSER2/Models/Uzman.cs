@@ -35,7 +35,7 @@ namespace HAIRDRESSER2.Models
         public int CalismaSaatiId { get; set; }
         [ForeignKey("CalismaSaatiId")]
         public CalismaSaati CalismaSaati { get; set; }
-
+           public virtual ICollection<Islem> Islemler { get; set; } 
         public DateTime EklenmeTarihi { get; set; }
     }
 }

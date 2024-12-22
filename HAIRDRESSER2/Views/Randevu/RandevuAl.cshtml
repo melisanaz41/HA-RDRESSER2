@@ -1,13 +1,86 @@
-﻿@model HAIRDRESSER2.Models.Uzman
+﻿@model HAIRDRESSER2.Models.RandevuViewModel
 @{
     ViewBag.Title = "Randevu Al";
 }
-<h2>@Model.Ad @Model.Soyad ile Randevu Al</h2>
-<form action="/Randevu/RandevuAl" method="post">
-    <input type="hidden" name="uzmanId" value="@Model.Id" />
-    <label for="tarih">Tarih:</label>
-    <input type="date" id="tarih" name="tarih" required />
-    <label for="saat">Saat:</label>
-    <input type="time" id="saat" name="saat" required />
-    <button type="submit">Randevu Al</button>
+<h2>Randevu Al</h2>
+<p>Bu sayfada randevu alma işlemi yapılacaktır.</p>
+<form asp-action="RandevuAl" method="post">
+    <!-- Tarih Seçimi -->
+    <div class="form-group">
+        <label for="tarih" class="form-label">Tarih:</label>
+        <input type="date" id="tarih" name="tarih" class="form-control" required />
+    </div>
+
+    <!-- Saat Seçimi -->
+    <div class="form-group">
+        <label for="saat" class="form-label">Saat:</label>
+        <input type="time" id="saat" name="saat" class="form-control" required />
+    </div>
+
+    <!-- İşlem Seçimi -->
+    <div class="form-group">
+        <label for="islemId" class="form-label">Yapılacak İşlem:</label>
+        <select id="islemId" name="islemId" class="form-control" onchange="fetchUzmanlar()" required>
+            <option value="" disabled selected>İşlem Seçiniz</option>
+            @foreach (var islem in ViewBag.Islemler)
+            {
+                <option value="@islem.Id">@islem.Ad - @islem.Fiyat TL (@islem.Sure dakika)</option>
+            }
+        </select>
+        <small id="islemError" class="text-danger" style="display:none;">Lütfen geçerli bir işlem seçiniz.</small>
+    </div>
+
+    <!-- Uzman Seçimi -->
+    <div class="form-group mt-3">
+        <label for="uzmanId" class="form-label">Uygun Uzman:</label>
+        <select id="uzmanId" name="uzmanId" class="form-control" required>
+            <option value="" disabled selected>Uzman Seçiniz</option>
+        </select>
+        <small id="uzmanError" class="text-danger" style="display:none;">Bu işlem için uygun uzman bulunamadı.</small>
+    </div>
+
+    <!-- Gönder Butonu -->
+    <button type="submit" class="btn btn-primary mt-3">Randevu Al</button>
 </form>
+
+<!-- Geri Dön Butonu -->
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+</div>
+
+<script>
+    async function fetchUzmanlar() {
+        const islemId = document.getElementById('islemId').value;
+        const uzmanSelect = document.getElementById('uzmanId');
+        const uzmanError = document.getElementById('uzmanError');
+
+        // Temizleme işlemi
+        uzmanSelect.innerHTML = '<option value="" disabled selected>Uzman Seçiniz</option>';
+        uzmanError.style.display = 'none';
+
+        if (islemId) {
+            try {
+                const response = await fetch(`/Randevu/GetUzmanlarByIslem/${islemId}`);
+                if (!response.ok) {
+                    throw new Error('Uzmanlar yüklenirken bir hata oluştu.');
+                }
+                const uzmanlar = await response.json();
+
+                if (uzmanlar.length === 0) {
+                    uzmanError.style.display = 'block';
+                } else {
+                    uzmanlar.forEach(uzman => {
+                        const option = document.createElement('option');
+                        option.value = uzman.id;
+                        option.textContent = `${uzman.ad} ${uzman.soyad}`;
+                        uzmanSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Uzmanları getirirken hata:', error);
+                uzmanError.textContent = 'Bir hata oluştu, lütfen tekrar deneyin.';
+                uzmanError.style.display = 'block';
+            }
+        }
+    }
+</script>
