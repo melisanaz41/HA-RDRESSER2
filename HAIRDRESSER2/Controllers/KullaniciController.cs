@@ -39,6 +39,7 @@ namespace HAIRDRESSER2.Controllers
             return View(kullanici);
         }
 
+
         // Kullanıcının randevularını listeleme
         public IActionResult Randevularim()
         {
