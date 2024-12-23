@@ -183,6 +183,7 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
 
         [AllowAnonymous]
         [HttpGet]
+        
         public IActionResult Login() => View();
 
         [AllowAnonymous]
