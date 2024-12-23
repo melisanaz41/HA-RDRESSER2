@@ -4,50 +4,54 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - NAZELLA HAİRDRESSER</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+
+    <!-- Site-specific CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/HAİRDRESSER2.styles.css" asp-append-version="true" />
+
     <style>
         body {
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Tüm ekran yüksekliğini kapla */
-            background-color: #f4f4f9; /* Genel arka plan için hafif gri */
+            min-height: 100vh;
+            background-color: #f4f4f9;
             font-family: Arial, sans-serif;
         }
 
         header {
             flex-shrink: 0;
-            background-color: #6d4c77; /* Header mor arka plan */
+            background-color: #6d4c77;
         }
 
             header .navbar-brand,
             header .nav-link {
-                color: white !important; /* Header metinleri beyaz */
+                color: white !important;
             }
 
                 header .nav-link:hover {
-                    color: #d9c8df !important; /* Hover için açık lila */
+                    color: #d9c8df !important;
                 }
 
         .content-wrapper {
-            flex: 1; /* İçerik alanını esnek hale getir */
-            background-color: #f8e6f5; /* İçerik kısmı lila tonu */
+            flex: 1;
+            background-color: #f8e6f5;
             padding: 30px;
-            border-radius: 10px; /* Köşeleri yuvarlat */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-            margin-bottom: 20px; /* Footer ile aralık bırak */
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         footer {
             flex-shrink: 0;
-            background-color: #6d4c77; /* Footer mor arka plan */
+            background-color: #6d4c77;
             color: white;
             padding: 10px;
         }
 
             footer a {
-                color: #d9c8df; /* Açık lila */
+                color: #d9c8df;
             }
 
                 footer a:hover {
@@ -74,6 +78,11 @@
                             <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Login">Admin Login</a>
                         </li>
                     </ul>
+
+
+
+
+
                     <!-- ÜYE OL ve GİRİŞ YAP butonları -->
                     <ul class="navbar-nav">
                         <li class="nav-item">
@@ -87,9 +96,10 @@
             </div>
         </nav>
     </header>
+
     <div class="container content-wrapper">
         <main role="main" class="pb-3">
-            @RenderBody() <!-- Sayfa içeriği buraya yüklenecek -->
+            @RenderBody()
         </main>
     </div>
 
@@ -98,9 +108,17 @@
             &copy; 2024 - NAZELLA HAİRDRESSER - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scriptler -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
+
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

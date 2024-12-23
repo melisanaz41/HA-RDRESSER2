@@ -1,0 +1,18 @@
+﻿@model IEnumerable<HAIRDRESSER2.Models.Uzman>
+
+@{
+    ViewBag.Title = "Uzman Seç";
+}
+
+<h2>Uzman Seç</h2>
+<p>Aşağıdaki uzmanlar arasından seçim yapınız:</p>
+
+<ul>
+    @foreach (var uzman in Model)
+    {
+        <li>
+            <strong>@uzman.Ad @uzman.Soyad</strong> - @uzman.UzmanlikAlani.Ad
+            <a asp-action="RandevuAl" asp-route-uzmanId="@uzman.Id" class="btn btn-primary btn-sm">Seç</a>
+        </li>
+    }
+</ul>

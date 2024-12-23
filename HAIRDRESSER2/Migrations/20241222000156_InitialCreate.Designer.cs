@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HAIRDRESSER2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241217130119_InitialCreate")]
+    [Migration("20241222000156_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -112,12 +112,7 @@ namespace HAIRDRESSER2.Migrations
                     b.Property<TimeSpan>("BitisSaati")
                         .HasColumnType("time");
 
-                    b.Property<int?>("UzmanId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UzmanId");
 
                     b.ToTable("CalismaSaatleri", (string)null);
 
@@ -142,6 +137,257 @@ namespace HAIRDRESSER2.Migrations
                         });
                 });
 
+            modelBuilder.Entity("HAIRDRESSER2.Models.Islem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Fiyat")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Sure")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UzmanId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UzmanlikAlaniId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UzmanId");
+
+                    b.HasIndex("UzmanlikAlaniId");
+
+                    b.ToTable("Islemler", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Ad = "Saç Kesimi",
+                            Fiyat = 200m,
+                            Sure = 60,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Ad = "Tüm Saç Boyama",
+                            Fiyat = 800m,
+                            Sure = 180,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Ad = "Ombre",
+                            Fiyat = 1500m,
+                            Sure = 240,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Ad = "Saç Düzleştirme",
+                            Fiyat = 1000m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Ad = "Saç Bakım Maskesi",
+                            Fiyat = 300m,
+                            Sure = 45,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Ad = "Keratin Bakımı",
+                            Fiyat = 1200m,
+                            Sure = 150,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Ad = "Fön",
+                            Fiyat = 200m,
+                            Sure = 30,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Ad = "Kahkül Kesimi",
+                            Fiyat = 150m,
+                            Sure = 30,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Ad = "Maşa Yapma",
+                            Fiyat = 300m,
+                            Sure = 45,
+                            UzmanlikAlaniId = 1
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Ad = "Gelin Makyajı",
+                            Fiyat = 4000m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 2
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Ad = "Özel Gün Makyajı",
+                            Fiyat = 2000m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Ad = "Kalıcı Makyaj",
+                            Fiyat = 1500m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 2
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Ad = "Göz Makyajı",
+                            Fiyat = 800m,
+                            Sure = 60,
+                            UzmanlikAlaniId = 2
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Ad = "Doğal Günlük Makyaj",
+                            Fiyat = 1000m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 2
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Ad = "Manikür",
+                            Fiyat = 150m,
+                            Sure = 45,
+                            UzmanlikAlaniId = 3
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Ad = "Pedikür",
+                            Fiyat = 200m,
+                            Sure = 60,
+                            UzmanlikAlaniId = 3
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Ad = "Jel Tırnak",
+                            Fiyat = 400m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 3
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Ad = "Tırnak Dekorasyonu",
+                            Fiyat = 500m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 3
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Ad = "Yüz Bakımı",
+                            Fiyat = 500m,
+                            Sure = 60,
+                            UzmanlikAlaniId = 4
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Ad = "Anti-Aging Bakımı",
+                            Fiyat = 800m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 4
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Ad = "Akne Tedavisi",
+                            Fiyat = 700m,
+                            Sure = 75,
+                            UzmanlikAlaniId = 4
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Ad = "Cilt Leke Tedavisi",
+                            Fiyat = 1200m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 4
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Ad = "Göz Çevresi Bakımı",
+                            Fiyat = 900m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 4
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Ad = "Lazer Epilasyon - Küçük Bölge",
+                            Fiyat = 300m,
+                            Sure = 30,
+                            UzmanlikAlaniId = 5
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Ad = "Lazer Epilasyon - Büyük Bölge",
+                            Fiyat = 600m,
+                            Sure = 60,
+                            UzmanlikAlaniId = 5
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Ad = "Lazer Epilasyon - Tüm Vücut",
+                            Fiyat = 2000m,
+                            Sure = 120,
+                            UzmanlikAlaniId = 5
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Ad = "Lazer Cilt Yenileme",
+                            Fiyat = 1500m,
+                            Sure = 90,
+                            UzmanlikAlaniId = 5
+                        });
+                });
+
             modelBuilder.Entity("HAIRDRESSER2.Models.Randevu", b =>
                 {
                     b.Property<int>("Id")
@@ -150,6 +396,9 @@ namespace HAIRDRESSER2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("IslemId")
+                        .HasColumnType("int");
+
                     b.Property<string>("KullaniciId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -157,13 +406,21 @@ namespace HAIRDRESSER2.Migrations
                     b.Property<TimeSpan>("Saat")
                         .HasColumnType("time");
 
+                    b.Property<int>("Sure")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Tarih")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Ucret")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("UzmanId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IslemId");
 
                     b.HasIndex("KullaniciId");
 
@@ -184,6 +441,9 @@ namespace HAIRDRESSER2.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("CalismaSaatiId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EklenmeTarihi")
                         .HasColumnType("datetime2");
 
@@ -199,6 +459,8 @@ namespace HAIRDRESSER2.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CalismaSaatiId");
 
                     b.HasIndex("UzmanlikAlaniId");
 
@@ -241,6 +503,11 @@ namespace HAIRDRESSER2.Migrations
                         {
                             Id = 4,
                             Ad = "Cilt Bakımı"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Ad = "Lazer"
                         });
                 });
 
@@ -377,15 +644,29 @@ namespace HAIRDRESSER2.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("HAIRDRESSER2.Models.CalismaSaati", b =>
+            modelBuilder.Entity("HAIRDRESSER2.Models.Islem", b =>
                 {
                     b.HasOne("HAIRDRESSER2.Models.Uzman", null)
-                        .WithMany("CalismaSaatleri")
+                        .WithMany("Islemler")
                         .HasForeignKey("UzmanId");
+
+                    b.HasOne("HAIRDRESSER2.Models.UzmanlikAlani", "UzmanlikAlani")
+                        .WithMany("Islemler")
+                        .HasForeignKey("UzmanlikAlaniId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UzmanlikAlani");
                 });
 
             modelBuilder.Entity("HAIRDRESSER2.Models.Randevu", b =>
                 {
+                    b.HasOne("HAIRDRESSER2.Models.Islem", "Islem")
+                        .WithMany()
+                        .HasForeignKey("IslemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("HAIRDRESSER2.Models.ApplicationUser", "Kullanici")
                         .WithMany("Randevular")
                         .HasForeignKey("KullaniciId")
@@ -398,6 +679,8 @@ namespace HAIRDRESSER2.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Islem");
+
                     b.Navigation("Kullanici");
 
                     b.Navigation("Uzman");
@@ -405,11 +688,19 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
                 {
+                    b.HasOne("HAIRDRESSER2.Models.CalismaSaati", "CalismaSaati")
+                        .WithMany("Uzmanlar")
+                        .HasForeignKey("CalismaSaatiId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HAIRDRESSER2.Models.UzmanlikAlani", "UzmanlikAlani")
                         .WithMany("Uzmanlar")
                         .HasForeignKey("UzmanlikAlaniId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CalismaSaati");
 
                     b.Navigation("UzmanlikAlani");
                 });
@@ -470,13 +761,20 @@ namespace HAIRDRESSER2.Migrations
                     b.Navigation("Randevular");
                 });
 
+            modelBuilder.Entity("HAIRDRESSER2.Models.CalismaSaati", b =>
+                {
+                    b.Navigation("Uzmanlar");
+                });
+
             modelBuilder.Entity("HAIRDRESSER2.Models.Uzman", b =>
                 {
-                    b.Navigation("CalismaSaatleri");
+                    b.Navigation("Islemler");
                 });
 
             modelBuilder.Entity("HAIRDRESSER2.Models.UzmanlikAlani", b =>
                 {
+                    b.Navigation("Islemler");
+
                     b.Navigation("Uzmanlar");
                 });
 #pragma warning restore 612, 618

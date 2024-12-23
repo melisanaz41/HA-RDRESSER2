@@ -2,12 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 
 namespace HAIRDRESSER2.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User")]
+   
+
     public class KullaniciController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -19,7 +22,6 @@ namespace HAIRDRESSER2.Controllers
             _userManager = userManager;
         }
 
-        // Kullanıcı profilini görüntüleme
         public IActionResult Profil()
         {
             var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -29,7 +31,10 @@ namespace HAIRDRESSER2.Controllers
                 return Unauthorized();
             }
 
-            var kullanici = _userManager.Users.FirstOrDefault(u => u.Id == kullaniciId);
+            var kullanici = _db.Users
+                               .Include(u => u.Randevular) // Kullanıcının randevularını yükle
+                               .ThenInclude(r => r.Uzman) // Randevularla birlikte Uzman bilgilerini yükle
+                               .FirstOrDefault(u => u.Id == kullaniciId);
 
             if (kullanici == null)
             {
