@@ -12,7 +12,7 @@ namespace HAIRDRESSER2.Controllers
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager; // Rol yönetimi için eklendi
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
@@ -20,7 +20,7 @@ namespace HAIRDRESSER2.Controllers
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
-         
+
         // GET: Register
         [HttpGet]
         [AllowAnonymous]
@@ -37,7 +37,7 @@ namespace HAIRDRESSER2.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model); // Validation hatalarını döndür
+                return View(model);
             }
 
             var user = new ApplicationUser
@@ -51,21 +51,39 @@ namespace HAIRDRESSER2.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                // "User" rolünü kontrol edip yoksa oluşturuyoruz kontrol
+                // "User" rolü kontrol edilip yoksa oluşturuluyor
                 if (!await _roleManager.RoleExistsAsync("User"))
                 {
-                    await _roleManager.CreateAsync(new IdentityRole("User"));
+                    var roleResult = await _roleManager.CreateAsync(new IdentityRole("User"));
+                    if (!roleResult.Succeeded)
+                    {
+                        // Rol oluşturma hatası
+                        foreach (var error in roleResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        return View(model);
+                    }
                 }
 
-                // Kullanıcıya "User" rolünü ekliyoruz
-                await _userManager.AddToRoleAsync(user, "User");
+                // Kullanıcıya "User" rolü atanıyor
+                var roleAssignResult = await _userManager.AddToRoleAsync(user, "User");
+                if (!roleAssignResult.Succeeded)
+                {
+                    // Rol atama hatası
+                    foreach (var error in roleAssignResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(model);
+                }
 
                 // Kullanıcıyı giriş yaptıktan sonra yönlendir
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
 
-            // Hataları loglayarak ve ModelState'e ekleyerek göster
+            // Kullanıcı oluşturma hatalarını logla ve ModelState'e ekle
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -77,8 +95,9 @@ namespace HAIRDRESSER2.Controllers
         // GET: Login
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
@@ -86,13 +105,15 @@ namespace HAIRDRESSER2.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            //Kullanıcı kontrol
+
             // Kullanıcıyı email ile bul
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -101,19 +122,30 @@ namespace HAIRDRESSER2.Controllers
                 return View(model);
             }
 
-            // Kullanıcı adı ve şifre doğrulama
             var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);
-            if (!result.Succeeded)
+
+            if (result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, "Geçersiz giriş bilgileri.");
-                return View(model);
+                // Kullanıcıyı profil sayfasına yönlendir
+                return RedirectToAction("Profil", "Kullanici");
             }
 
-            // Giriş başarılı, ana sayfaya yönlendir
+            ModelState.AddModelError(string.Empty, "Geçersiz giriş bilgileri.");
+            return View(model);
+        }
+
+        // Giriş sonrası yönlendirme
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: Admin Login
+        // GET: Admin Control
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public IActionResult AdminControl()
