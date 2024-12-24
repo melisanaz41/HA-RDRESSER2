@@ -1,18 +1,39 @@
 ﻿@model IEnumerable<HAIRDRESSER2.Models.Uzman>
 
-@{
-    ViewBag.Title = "Uzman Seç";
-}
-
 <h2>Uzman Seç</h2>
-<p>Aşağıdaki uzmanlar arasından seçim yapınız:</p>
+<p>Randevu alacağınız uzmanı seçiniz:</p>
 
-<ul>
-    @foreach (var uzman in Model)
-    {
-        <li>
-            <strong>@uzman.Ad @uzman.Soyad</strong> - @uzman.UzmanlikAlani.Ad
-            <a asp-action="RandevuAl" asp-route-uzmanId="@uzman.Id" class="btn btn-primary btn-sm">Seç</a>
-        </li>
-    }
-</ul>
+@if (Model != null && Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ad</th>
+                <th>Uzmanlık Alanı</th>
+                <th>Çalışma Saatleri</th>
+                <th>Seç</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var uzman in Model)
+            {
+                <tr>
+                    <td>@uzman.Ad @uzman.Soyad</td>
+                    <td>@uzman.UzmanlikAlani?.Ad ?? "Bilinmiyor"</td>
+                    <td>
+                        @(uzman.CalismaSaati != null
+                            ? $"{uzman.CalismaSaati.BaslangicSaati:hh\\:mm} - {uzman.CalismaSaati.BitisSaati:hh\\:mm}"
+                            : "Bilinmiyor")
+                    </td>
+                    <td>
+                        <a asp-controller="Randevu" asp-action="RandevuAl" asp-route-uzmanId="@uzman.Id" class="btn btn-primary">Seç</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-danger">Hiç uzman bulunamadı.</p>
+}

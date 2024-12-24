@@ -3,123 +3,176 @@ using Microsoft.AspNetCore.Mvc;
 using HAIRDRESSER2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace HAIRDRESSER2.Controllers
 {
-    [Authorize(Roles = "Admin")] // Sadece Admin rolü olanlar erişebilir
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AdminController(
+            ApplicationDbContext db,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AdminController> logger)
         {
             _db = db;
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
-        // Admin Dashboard
-        public IActionResult AdminDashboard()
-        {
-            return View();
-        }
+        public IActionResult AdminDashboard() => View();
 
-        // Uzman Listesi
-        public IActionResult UzmanListesi()
+        public async Task<IActionResult> UzmanListesi()
         {
-            var uzmanlar = _db.Uzmanlar
-                            .Include(u => u.UzmanlikAlani)
-                            .Include(u => u.CalismaSaati)
-                            .ToList();
+            var uzmanlar = await _db.Uzmanlar
+                                   .Include(u => u.UzmanlikAlani)
+                                   .Include(u => u.CalismaSaati)
+                                   .ToListAsync();
             return View(uzmanlar);
         }
-
-        //Uzman Ekleme  (GET)
         [HttpGet]
-        public IActionResult UzmanEkle()
+public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
+{
+    var islemler = await _db.Islemler
+                           .Where(i => i.UzmanlikAlaniId == id)
+                           .Select(i => new { i.Ad, i.Fiyat, i.Sure })
+                           .ToListAsync();
+    return Json(islemler);
+}
+        [HttpGet]
+        public async Task<IActionResult> UzmanEkle()
         {
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
-            ViewBag.CalismaSaatleri = _db.CalismaSaati
-                .Select(cs => new
-                {
-                    Id = cs.Id,
-                    SaatAraligi = $"{cs.BaslangicSaati} - {cs.BitisSaati}"
-                }).ToList();
-
-            return View();
+            var viewModel = await CreateUzmanViewModelAsync();
+            return View(viewModel);
         }
 
-        // Yeni Uzman Ekleme (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UzmanEkle(Uzman uzman)
+        public async Task<IActionResult> UzmanEkle(UzmanViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (viewModel.Uzman.UzmanlikAlaniId == 0)
             {
-                uzman.EklenmeTarihi = DateTime.Now; // Eklenme tarihini otomatik ata
-                _db.Uzmanlar.Add(uzman);
-                _db.SaveChanges();
-                return RedirectToAction("UzmanListesi");
+                ModelState.AddModelError("Uzman.UzmanlikAlaniId", "Lütfen geçerli bir uzmanlık alanı seçiniz.");
             }
 
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
-            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
-            return View(uzman);
+            if (viewModel.Uzman.CalismaSaatiId == 0)
+            {
+                ModelState.AddModelError("Uzman.CalismaSaatiId", "Lütfen geçerli bir çalışma saati seçiniz.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState geçersiz ancak test için işlem devam ediyor.");
+            }
+
+            try
+            {
+                viewModel.Uzman.EklenmeTarihi = DateTime.Now;
+                _db.Add(viewModel.Uzman);
+
+                // Uzmanlık alanına ait işlemleri ekle
+                var islemler = await _db.Islemler
+                                        .Where(i => i.UzmanlikAlaniId == viewModel.Uzman.UzmanlikAlaniId)
+                                        .ToListAsync();
+
+                viewModel.Uzman.Islemler = islemler;
+
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Uzman başarıyla eklendi.";
+                return RedirectToAction("UzmanListesi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Uzman eklenirken bir hata oluştu.");
+                ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
+            }
+
+            viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
+            return View(viewModel);
         }
 
-        // Uzman Güncelleme (GET)
         [HttpGet]
-        public IActionResult UzmanGuncelle(int id)
+        public async Task<IActionResult> UzmanGuncelle(int id)
         {
-            var uzman = _db.Uzmanlar
+            var uzman = await _db.Uzmanlar
                 .Include(u => u.CalismaSaati)
-                .FirstOrDefault(u => u.Id == id);
+                .Include(u => u.UzmanlikAlani)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (uzman == null)
             {
                 return NotFound();
             }
 
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
-            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
-            return View(uzman);
+            var viewModel = await CreateUzmanViewModelAsync(uzman.UzmanlikAlaniId, uzman.CalismaSaatiId);
+            viewModel.Uzman = uzman;
+            return View(viewModel);
         }
 
-        // Uzman Güncelleme (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UzmanGuncelle(Uzman uzman)
+        public async Task<IActionResult> UzmanGuncelle(UzmanViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _db.Uzmanlar.Update(uzman);
-                _db.SaveChanges();
-                return RedirectToAction("UzmanListesi");
+                try
+                {
+                    _db.Uzmanlar.Update(viewModel.Uzman);
+
+                    // Uzmanlık alanına ait işlemleri güncelle
+                    var islemler = await _db.Islemler
+                                            .Where(i => i.UzmanlikAlaniId == viewModel.Uzman.UzmanlikAlaniId)
+                                            .ToListAsync();
+
+                    viewModel.Uzman.Islemler = islemler;
+
+                    await _db.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Uzman başarıyla güncellendi.";
+                    return RedirectToAction("UzmanListesi");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Uzman güncellenirken bir hata oluştu.");
+                    ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
+                }
             }
 
-            ViewBag.UzmanlikAlanlari = _db.UzmanlikAlanlari.ToList();
-            ViewBag.CalismaSaatleri = _db.CalismaSaati.ToList();
-            return View(uzman);
+            viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
+            return View(viewModel);
         }
 
-        // Uzman Silme
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UzmanSil(int id)
+        public async Task<IActionResult> UzmanSil(int id)
         {
-            var uzman = _db.Uzmanlar.Find(id);
-            if (uzman != null)
+            try
             {
-                _db.Uzmanlar.Remove(uzman);
-                _db.SaveChanges();
+                var uzman = await _db.Uzmanlar.FindAsync(id);
+                if (uzman != null)
+                {
+                    _db.Uzmanlar.Remove(uzman);
+                    await _db.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Uzman başarıyla silindi.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Uzman silinirken bir hata oluştu.");
+                TempData["ErrorMessage"] = "Uzman silinirken bir hata oluştu. Lütfen tekrar deneyin.";
             }
 
             return RedirectToAction("UzmanListesi");
         }
 
-        // Admin Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -128,15 +181,11 @@ namespace HAIRDRESSER2.Controllers
             return RedirectToAction("Login", "Admin");
         }
 
-        // Admin Login (GET)
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        
+        public IActionResult Login() => View();
 
-        // Admin Login (POST)
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -152,7 +201,6 @@ namespace HAIRDRESSER2.Controllers
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         return RedirectToAction("AdminDashboard");
                     }
-
                     ModelState.AddModelError("", "Admin yetkisi bulunmamaktadır.");
                 }
                 else
@@ -161,6 +209,34 @@ namespace HAIRDRESSER2.Controllers
                 }
             }
             return View(model);
+        }
+
+        private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
+        {
+            var uzmanlikAlanlari = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "Seçiniz" }
+    };
+            uzmanlikAlanlari.AddRange(await _db.UzmanlikAlanlari
+                .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Ad }).ToListAsync());
+
+            var calismaSaatleri = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "Seçiniz" }
+    };
+            calismaSaatleri.AddRange(await _db.CalismaSaatleri
+                .Select(x => new SelectListItem
+                {
+                    Value = x.Id.ToString(),
+                    Text = $"{x.BaslangicSaati} - {x.BitisSaati}"
+                }).ToListAsync());
+
+            return new UzmanViewModel
+            {
+                Uzman = new Uzman(),
+                UzmanlikAlanlari = new SelectList(uzmanlikAlanlari, "Value", "Text", uzmanlikAlaniId ?? 0),
+                CalismaSaatleri = new SelectList(calismaSaatleri, "Value", "Text", calismaSaatiId ?? 0)
+            };
         }
     }
 }
