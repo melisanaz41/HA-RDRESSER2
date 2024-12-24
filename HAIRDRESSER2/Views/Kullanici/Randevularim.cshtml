@@ -23,12 +23,12 @@
             foreach (var randevu in Model)
             {
                 <tr>
-                    <td>@randevu.Id</td>
-                    <td>@randevu.Uzman.Ad @randevu.Uzman.Soyad</td>
-                    <td>@randevu.Islem.Ad</td>
-                    <td>@randevu.Tarih.ToShortDateString()</td>
-                    <td>@randevu.Saat</td>
-                    <td>@randevu.Ucret.ToString("C")</td>
+                    <td>@randevu?.Id</td>
+                    <td>@randevu?.Uzman != null ? $"{randevu.Uzman.Ad} {randevu.Uzman.Soyad}" : "Bilinmiyor"</td>
+                    <td>@randevu?.Islem != null ? randevu.Islem.Ad : "Bilinmiyor"</td>
+                    <td>@randevu?.Tarih.ToShortDateString()</td>
+                    <td>@randevu?.Saat.ToString(@"hh\:mm")</td>
+                    <td>@randevu?.Ucret != null ? randevu.Ucret.ToString("C") : "Bilinmiyor"</td>
                 </tr>
             }
         }

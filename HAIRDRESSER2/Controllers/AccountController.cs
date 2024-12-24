@@ -92,7 +92,7 @@ namespace HAIRDRESSER2.Controllers
             {
                 return View(model);
             }
-            //Kullanıcı kontrol
+
             // Kullanıcıyı email ile bul
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -109,9 +109,10 @@ namespace HAIRDRESSER2.Controllers
                 return View(model);
             }
 
-            // Giriş başarılı, ana sayfaya yönlendir
-            return RedirectToAction("Index", "Home");
+            // Giriş başarılıysa Profil sayfasına yönlendir
+            return RedirectToAction("Profil", "Kullanici");
         }
+
 
         // GET: Admin Login
         [HttpGet]

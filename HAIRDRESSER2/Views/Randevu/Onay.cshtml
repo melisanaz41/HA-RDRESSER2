@@ -1,0 +1,16 @@
+﻿@model HAIRDRESSER2.Models.Randevu
+
+@{
+    ViewBag.Title = "Randevu Onay";
+}
+
+<h2>Randevu Onaylandı</h2>
+
+<div>
+    <p><strong>Uzman:</strong> @Model.Uzman?.Ad @Model.Uzman?.Soyad (@Model.Uzman?.UzmanlikAlani?.Ad ?? "Bilinmiyor")</p>
+    <p><strong>Tarih:</strong> @Model.Tarih.ToShortDateString()</p>
+    <p><strong>Saat:</strong> @Model.Saat</p>
+    <p><strong>Yapılacak İşlem:</strong> @Model.IslemId</p>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Ana Sayfaya Dön</a>

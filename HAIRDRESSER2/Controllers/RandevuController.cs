@@ -8,11 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HAIRDRESSER2.Controllers
 {
-
     [Authorize] // Bu controller'a yalnızca oturum açmış kullanıcılar erişebilir
     public class RandevuController : Controller
     {
-        //kdhıwq
         private readonly ApplicationDbContext db;
 
         // Dependency Injection ile ApplicationDbContext'i alıyoruz
@@ -25,78 +23,119 @@ namespace HAIRDRESSER2.Controllers
         [HttpGet]
         public IActionResult RandevuAl(int uzmanId)
         {
+            Console.WriteLine($"[DEBUG] RandevuAl - UzmanId: {uzmanId}");
+
+            if (uzmanId <= 0)
+            {
+                var uzmanlar = db.Uzmanlar.Include(u => u.UzmanlikAlani).ToList();
+                if (!uzmanlar.Any())
+                {
+                    return Content("Hiç uzman bulunamadı.");
+                }
+                return View("UzmanSec", uzmanlar);
+            }
+
             var uzman = db.Uzmanlar
-                         .Include(u => u.CalismaSaati)
-                         .FirstOrDefault(u => u.Id == uzmanId);
+                          .Include(u => u.UzmanlikAlani)
+                          .Include(u => u.CalismaSaati)
+                          .Include(u => u.Islemler)
+                          .FirstOrDefault(u => u.Id == uzmanId);
 
             if (uzman == null)
             {
-                return NotFound(); // Uzman bulunamazsa 404 döndür
+                return Content($"Uzman bulunamadı: uzmanId = {uzmanId}");
             }
 
-            ViewBag.Uzman = uzman;
+            ViewBag.SelectedUzman = uzman;
+            ViewBag.Islemler = uzman.Islemler;
+
             return View();
         }
 
         // Randevu alma işlemi (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RandevuAl(int uzmanId, DateTime tarih, TimeSpan saat)
+        public IActionResult SubmitRandevu(int uzmanId, DateTime tarih, TimeSpan saat, int islemId)
         {
-            // Geçerli kullanıcı kimliğini alıyoruz
+            // Parametrelerin loglanması
+            Console.WriteLine($"[DEBUG] SubmitRandevu - UzmanId: {uzmanId}, Tarih: {tarih}, Saat: {saat}, IslemId: {islemId}");
+
+            if (uzmanId <= 0)
+            {
+                Console.WriteLine("[ERROR] UzmanId sıfır veya geçersiz.");
+                ModelState.AddModelError("", "Geçersiz uzman seçimi.");
+                return View("RandevuAl");
+            }
+
             var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(kullaniciId))
             {
-                return Unauthorized(); // Kullanıcı oturum açmamışsa yetkisiz hata döndür
+                Console.WriteLine("[ERROR] Kullanıcı kimliği bulunamadı.");
+                return Unauthorized("Kullanıcı oturum açmamış.");
             }
 
-            // Uzmanı ve çalışma saatlerini dahil ederek buluyoruz
             var uzman = db.Uzmanlar
-                         .Include(u => u.CalismaSaati)
-                         .FirstOrDefault(u => u.Id == uzmanId);
+                          .Include(u => u.UzmanlikAlani)
+                          .Include(u => u.CalismaSaati)
+                          .Include(u => u.Islemler)
+                          .FirstOrDefault(u => u.Id == uzmanId);
 
             if (uzman == null)
             {
-                return NotFound(); // Uzman bulunamazsa 404 döndür
+                Console.WriteLine($"[ERROR] Geçersiz UzmanId: {uzmanId}");
+                ModelState.AddModelError("", "Geçersiz uzman seçimi.");
+                return View("RandevuAl");
             }
 
-            // Uzmanın çalışma saatlerini kontrol et
             var calismaSaati = uzman.CalismaSaati;
-            if (calismaSaati != null &&
-                calismaSaati.BaslangicSaati <= saat &&
-                calismaSaati.BitisSaati >= saat)
+            if (calismaSaati == null || saat < calismaSaati.BaslangicSaati || saat >= calismaSaati.BitisSaati)
             {
-                var randevu = new Randevu
-                {
-                    UzmanId = uzmanId,
-                    Tarih = tarih,
-                    Saat = saat,
-                    KullaniciId = kullaniciId // Kullanıcı kimliğini ata
-                };
-
-                db.Randevular.Add(randevu);
-                db.SaveChanges();
-
-                return RedirectToAction("Onay", new { id = randevu.Id }); // Onay sayfasına yönlendir
+                Console.WriteLine("[WARNING] Çalışma saati kontrolü hatalı.");
+                ModelState.AddModelError("", "Seçilen saat çalışma saatleri dışında.");
+                ViewBag.SelectedUzman = uzman;
+                ViewBag.Islemler = uzman.Islemler;
+                return View("RandevuAl");
             }
 
-            // Çalışma saati uygun değilse hata mesajı döndür
-            ModelState.AddModelError("", "Seçilen saat çalışma saatleri dışında!");
-            ViewBag.Uzman = uzman;
-            return View();
+            var randevu = new Randevu
+            {
+                UzmanId = uzmanId,
+                Tarih = tarih,
+                Saat = saat,
+                KullaniciId = kullaniciId,
+                IslemId = islemId
+            };
+
+            db.Randevular.Add(randevu);
+
+            try
+            {
+                db.SaveChanges();
+                Console.WriteLine("[SUCCESS] Randevu başarıyla kaydedildi.");
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"[ERROR] Veritabanı hatası: {ex.InnerException?.Message}");
+                ModelState.AddModelError("", "Randevu kaydedilirken bir hata oluştu.");
+                ViewBag.SelectedUzman = uzman;
+                ViewBag.Islemler = uzman.Islemler;
+                return View("RandevuAl");
+            }
+
+            return RedirectToAction("Onay", new { id = randevu.Id });
         }
 
+
         // Onay Sayfası
-        //
         public IActionResult Onay(int id)
         {
             var randevu = db.Randevular
-                            .Include(r => r.Uzman)
-                            .FirstOrDefault(r => r.Id == id);
+                             .Include(r => r.Uzman)
+                             .FirstOrDefault(r => r.Id == id);
 
             if (randevu == null)
             {
-                return NotFound();
+                return NotFound("Randevu bulunamadı.");
             }
 
             return View(randevu);
