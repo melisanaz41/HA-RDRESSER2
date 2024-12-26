@@ -19,6 +19,10 @@
     <ul id="recommendationList"></ul>
 </div>
 
+<div id="loading" style="margin-top: 20px; display: none;">
+    <p>Lütfen bekleyin, öneriler alınıyor...</p>
+</div>
+
 <script>
     document.getElementById('submitButton').addEventListener('click', async () => {
         const fileInput = document.getElementById('photo');
@@ -29,29 +33,45 @@
             return;
         }
 
+        // Fotoğrafı yüklemeden önce kullanıcıyı bilgilendir
+        document.getElementById('loading').style.display = 'block';
+
         const reader = new FileReader();
         reader.onload = async () => {
-            const base64Photo = reader.result.split(',')[1]; // Fotoğrafı Base64 olarak al
-            const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ PhotoBase64: base64Photo })
-            });
+            try {
+                const base64Photo = reader.result.split(',')[1]; // Fotoğrafı Base64 olarak al
 
-            if (response.ok) {
-                const data = await response.json();
-                const recommendationList = document.getElementById('recommendationList');
-                recommendationList.innerHTML = ''; // Önceki önerileri temizle
-                data.Recommendations.forEach(rec => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = rec;
-                    recommendationList.appendChild(listItem);
+                const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ PhotoBase64: base64Photo })
                 });
-                document.getElementById('recommendations').style.display = 'block';
-            } else {
-                alert('Öneriler alınırken bir hata oluştu.');
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Önerileri listeye ekle
+                    const recommendationList = document.getElementById('recommendationList');
+                    recommendationList.innerHTML = ''; // Önceki önerileri temizle
+                    data.Recommendations.forEach(rec => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = rec;
+                        recommendationList.appendChild(listItem);
+                    });
+
+                    document.getElementById('recommendations').style.display = 'block';
+                } else {
+                    // API'den hata mesajını al ve göster
+                    const errorData = await response.json();
+                    alert(errorData.Message || 'Öneriler alınırken bir hata oluştu.');
+                }
+            } catch (error) {
+                alert('Bir hata oluştu: ' + error.message);
+            } finally {
+                // Yükleme göstergesini gizle
+                document.getElementById('loading').style.display = 'none';
             }
         };
 

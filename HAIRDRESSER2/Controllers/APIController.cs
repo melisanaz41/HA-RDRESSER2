@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -8,9 +10,9 @@ public class RecommendationController : ControllerBase
 {
     private readonly HttpClient _httpClient;
 
-    public RecommendationController(HttpClient httpClient)
+    public RecommendationController(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("OpenAIAPI");
     }
 
     [HttpPost("GetHairStyleRecommendation")]
@@ -23,54 +25,87 @@ public class RecommendationController : ControllerBase
 
         try
         {
-            // Fotoğrafı Base64'ten geçici bir dosyaya dönüştürme
-            var photoBytes = Convert.FromBase64String(request.PhotoBase64);
-            var tempPhotoPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.jpg");
-            await System.IO.File.WriteAllBytesAsync(tempPhotoPath, photoBytes);
+            // Kullanıcının girdisi ile OpenAI'ye prompt oluşturma
+            var userPrompt = "Based on the user's preferences and hairstyle needs, provide hairstyle recommendations.";
+            var apiResult = await CallOpenAIAPI(userPrompt);
 
-            // Dış API'ye istek gönder
-            var apiResult = await CallExternalAPI(photoBytes);
-
-            // Geçici dosyayı sil
-            System.IO.File.Delete(tempPhotoPath);
-
+            // Başarılı API yanıtı
             return Ok(new { Message = "Başarılı", Recommendations = apiResult });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = "Hata oluştu.", Error = ex.Message });
+            // Hata detaylarını loglama
+            Debug.WriteLine($"Hata: {ex.Message}");
+            return StatusCode(500, new { Message = "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.", Error = ex.Message });
         }
     }
 
-    private async Task<List<string>> CallExternalAPI(byte[] photoBytes)
+    private async Task<List<string>> CallOpenAIAPI(string prompt)
     {
-        // Dış API URL'si
-        var apiUrl = "https://api-inference.huggingface.co/models/google/vit-base-patch16-224"; // Değiştirin
-
-        // İstek verilerini hazırlayın
-        var content = new MultipartFormDataContent();
-        var byteArrayContent = new ByteArrayContent(photoBytes);
-        byteArrayContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
-        content.Add(byteArrayContent, "file", "photo.jpg");
-
-        // API isteği gönder
-        var response = await _httpClient.PostAsync(apiUrl, content);
-
-        if (!response.IsSuccessStatusCode)
+        var requestBody = new
         {
-            throw new Exception($"API isteği başarısız oldu: {response.StatusCode} - {response.ReasonPhrase}");
+            model = "gpt-4",
+            messages = new[]
+            {
+            new { role = "system", content = "You are a professional hairstylist assistant." },
+            new { role = "user", content = prompt }
+        },
+            max_tokens = 100,
+            temperature = 0.7
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        try
+        {
+            Debug.WriteLine("API isteği gönderiliyor...");
+            Debug.WriteLine($"Request Body: {json}");
+
+            var response = await _httpClient.PostAsync("chat/completions", content);
+
+            Debug.WriteLine($"HTTP Durum Kodu: {response.StatusCode}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"API Hata Detayı: {errorDetails}");
+                throw new Exception($"API isteği başarısız oldu: {response.StatusCode} - {response.ReasonPhrase}");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"API Yanıtı: {responseContent}");
+
+            var result = JsonSerializer.Deserialize<OpenAIResponse>(responseContent);
+            return result?.Choices.Select(choice => choice.Message.Content).ToList() ?? new List<string>();
         }
-
-        // Yanıtı işle
-        var apiResponse = await response.Content.ReadAsStringAsync();
-        // Örnek: API yanıtı JSON formatında dönerse deserialize edin
-        var recommendations = System.Text.Json.JsonSerializer.Deserialize<List<string>>(apiResponse);
-
-        return recommendations ?? new List<string>();
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"OpenAI API çağrısı sırasında hata oluştu: {ex.Message}");
+            throw;
+        }
     }
-}
 
-public class HairStyleRequestModel
-{
-    public string PhotoBase64 { get; set; }
+
+    // İstek model sınıfı
+    public class HairStyleRequestModel
+    {
+        public string PhotoBase64 { get; set; }
+    }
+
+    // OpenAI API Yanıt Modeli
+    public class OpenAIResponse
+    {
+        public List<Choice> Choices { get; set; }
+    }
+
+    public class Choice
+    {
+        public Message Message { get; set; }
+    }
+
+    public class Message
+    {
+        public string Content { get; set; }
+    }
 }

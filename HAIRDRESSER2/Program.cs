@@ -1,12 +1,25 @@
 ﻿using HAIRDRESSER2.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Net.Http.Headers;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        // OpenAI API Anahtarını yapılandırma
+        builder.Services.AddHttpClient("OpenAIAPI", client =>
+        {
+            client.BaseAddress = new Uri("https://api.openai.com/v1/");
+            string apiKey = "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"; // API anahtarınızı burada belirtin
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            Debug.WriteLine($"API Anahtarı Kullanılıyor: {apiKey}");
+        });
+
 
         // Veritabanı yapılandırması
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -15,7 +28,6 @@ internal class Program
         // Identity yapılandırması
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
-            // Şifre politikalarını yapılandırma
             options.Password.RequireDigit = false;
             options.Password.RequiredLength = 6;
             options.Password.RequireNonAlphanumeric = false;
@@ -25,69 +37,50 @@ internal class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-        // Denetleyiciler ve görünümler
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
-        // Middleware yapılandırması
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
-        app.UseStaticFiles(); // Statik dosyaları yükleme (wwwroot)
-        app.UseRouting();     // Rota yapılandırması
-        app.UseAuthentication(); // Kimlik doğrulama
-        app.UseAuthorization();  // Yetkilendirme
+        else
+        {
+            app.UseDeveloperExceptionPage();
+        }
+
+        app.UseStaticFiles();
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        // Kök URL yönlendirmesi
-        app.MapGet("/", context =>
-        {
-            context.Response.Redirect("/Home/Index", permanent: false);
-            return Task.CompletedTask;
-        });
-
-        // Rolleri ve admin kullanıcıyı seed etme
         await SeedDatabaseAsync(app);
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
-        else
-        {
-            app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
-        }
 
         app.Run();
     }
 
     private static async Task SeedDatabaseAsync(WebApplication app)
     {
-        using (var scope = app.Services.CreateScope())
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+
+        try
         {
-            var services = scope.ServiceProvider;
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-            try
-            {
-                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-                // Rolleri seed et
-                await SeedRolesAsync(roleManager);
-
-                // Admin kullanıcıyı seed et
-                await SeedAdminUserAsync(userManager);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error seeding data: {ex.Message}");
-            }
+            await SeedRolesAsync(roleManager);
+            await SeedAdminUserAsync(userManager);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error seeding data: {ex.Message}");
         }
     }
 
@@ -111,7 +104,7 @@ internal class Program
     private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
     {
         string adminEmail = "admin@example.com";
-        string adminPassword = "Admin123!"; // Şifre
+        string adminPassword = "Admin123!";
 
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin == null)
