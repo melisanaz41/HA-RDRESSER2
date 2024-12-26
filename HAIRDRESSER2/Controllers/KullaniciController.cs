@@ -153,7 +153,7 @@ namespace HAIRDRESSER2.Controllers
 
             return RedirectToAction("Profil");
         }
-
+        //deneme
         protected override void Dispose(bool disposing)
         {
             if (disposing)
