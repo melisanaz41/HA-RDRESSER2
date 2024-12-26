@@ -1,61 +1,9 @@
-﻿@model HAIRDRESSER2.Models.ApplicationUser
-
-@{
-    ViewBag.Title = "Profil";
+﻿@{
+    ViewBag.Title = "Saç Modeli Önerisi";
 }
 
-<h2>@Model.Ad @Model.Soyad - Profil</h2>
+<h2>Saç Modeli Önerisi</h2>
 
-<div class="mt-4">
-    <h3>Seçenekler</h3>
-    <div class="btn-group" role="group" aria-label="Kullanıcı Seçenekleri">
-        <a class="btn btn-primary" asp-controller="Kullanici" asp-action="Profil">Profilim</a>
-        <a class="btn btn-secondary" asp-controller="Kullanici" asp-action="Randevularim">Randevularım</a>
-        <a class="btn btn-success" asp-controller="Randevu" asp-action="RandevuAl">Randevu Al</a>
-    </div>
-</div>
-
-<hr />
-
-<div style="margin-bottom: 20px;">
-    <h3>Kişisel Bilgiler</h3>
-    <p><strong>Email:</strong> @Model.Email</p>
-    <p><strong>Telefon:</strong> @Model.PhoneNumber</p>
-</div>
-
-<h3>Randevular</h3>
-@if (Model.Randevular != null && Model.Randevular.Any())
-{
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Tarih</th>
-                <th>Saat</th>
-                <th>Uzman Adı</th>
-                <th>Uzman Soyadı</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var randevu in Model.Randevular)
-            {
-                <tr>
-                    <td>@randevu.Tarih.ToShortDateString()</td>
-                    <td>@randevu.Saat</td>
-                    <td>@randevu.Uzman.Ad</td>
-                    <td>@randevu.Uzman.Soyad</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>Henüz randevunuz bulunmamaktadır.</p>
-}
-
-<hr />
-
-<h3>Saç Modeli Önerisi</h3>
 <p>Bir fotoğraf yükleyerek sizin için en uygun saç modelini keşfedin.</p>
 
 <form id="photoUploadForm" enctype="multipart/form-data">
@@ -63,7 +11,7 @@ else
         <label for="photo">Fotoğraf Yükle:</label>
         <input type="file" id="photo" accept="image/*" required />
     </div>
-    <button type="button" id="submitButton" class="btn btn-primary mt-2">Önerileri Al</button>
+    <button type="button" id="submitButton">Önerileri Al</button>
 </form>
 
 <div id="recommendations" style="margin-top: 20px; display: none;">

@@ -43,6 +43,38 @@ namespace HAIRDRESSER2.Controllers
 
             return View(kullanici);
         }
+        [HttpPost]
+        public IActionResult UploadPhoto(IFormFile photo)
+        {
+            if (photo == null || photo.Length == 0)
+            {
+                TempData["Error"] = "Lütfen geçerli bir fotoğraf seçin.";
+                return RedirectToAction("Profil");
+            }
+
+            // Dosya adı oluşturma ve yolu belirleme
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads", fileName);
+
+            // Fotoğrafı kaydetme
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                photo.CopyTo(stream);
+            }
+
+            // Kullanıcı profilini güncelleme
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = _db.Users.FirstOrDefault(u => u.Id == userId);
+            if (user != null)
+            {
+                user.ProfilePhotoPath = fileName;
+                _db.SaveChanges();
+            }
+
+            TempData["Success"] = "Fotoğraf başarıyla yüklendi.";
+            return RedirectToAction("Profil");
+        }
+
 
 
         // Kullanıcının randevularını listeleme

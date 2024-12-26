@@ -38,8 +38,112 @@ namespace HAIRDRESSER2.Controllers
                                    .Include(u => u.CalismaSaati)
                                    .ToListAsync();
             return View(uzmanlar);
+
+        }
+
+
+        [HttpGet]
+        [HttpGet]
+        public IActionResult Randevular()
+        {
+            var randevular = _db.Randevular
+                                .Include(r => r.Uzman)
+                                .Include(r => r.Islem)
+                                .ToList();
+
+            var randevuDurumlari = _db.RandevuDurumlari.ToList();
+
+            var viewModel = randevular.Select(r => new
+            {
+                Randevu = r,
+                Durum = randevuDurumlari.FirstOrDefault(d => d.RandevuId == r.Id)?.Durum
+            }).ToList();
+
+            return View(viewModel);
         }
         [HttpGet]
+        public IActionResult Raporlama()
+        {
+            var gelinenRandevular = _db.RandevuDurumlari
+                .Where(d => d.Durum == "Gelindi")
+                .Include(d => d.Randevu)
+                .ThenInclude(r => r.Islem)
+                .Include(d => d.Randevu.Uzman)
+                .ToList();
+
+            var toplamKazanc = gelinenRandevular.Sum(r => r.Randevu.Islem.Fiyat);
+            var toplamGelinenRandevu = gelinenRandevular.Count;
+
+            var uzmanRaporlari = gelinenRandevular
+                .GroupBy(r => r.Randevu.Uzman)
+                .Select(g => new
+                {
+                    Uzman = g.Key,
+                    RandevuSayisi = g.Count(),
+                    ToplamKazanc = g.Sum(r => r.Randevu.Islem.Fiyat)
+                }).ToList();
+
+            var rapor = new
+            {
+                ToplamKazanc = toplamKazanc,
+                ToplamGelinenRandevu = toplamGelinenRandevu,
+                UzmanRaporlari = uzmanRaporlari
+            };
+
+            return View(rapor);
+        }
+
+        // Randevu durumu güncelleme
+        [HttpPost]
+        public IActionResult RandevuDurumuGuncelle(int randevuId, string durum)
+        {
+            var mevcutDurum = _db.RandevuDurumlari.FirstOrDefault(d => d.RandevuId == randevuId);
+
+            if (mevcutDurum == null)
+            {
+                // Yeni durum ekle
+                var yeniDurum = new RandevuDurumu
+                {
+                    RandevuId = randevuId,
+                    Durum = durum,
+                    IslemTarihi = DateTime.Now
+                };
+                _db.RandevuDurumlari.Add(yeniDurum);
+            }
+            else
+            {
+                // Mevcut durumu güncelle
+                mevcutDurum.Durum = durum;
+                mevcutDurum.IslemTarihi = DateTime.Now;
+                _db.RandevuDurumlari.Update(mevcutDurum);
+            }
+
+            _db.SaveChanges();
+            return RedirectToAction("Randevular");
+        }
+
+        // Randevu silme işlemi
+        [HttpPost]
+        public IActionResult RandevuSil(int id)
+        {
+            var randevu = _db.Randevular.FirstOrDefault(r => r.Id == id);
+            if (randevu == null)
+            {
+                return NotFound("Randevu bulunamadı.");
+            }
+
+            _db.Randevular.Remove(randevu);
+            _db.SaveChanges();
+
+            return RedirectToAction("Randevular");
+        }
+    
+
+
+
+
+
+[HttpGet]
 public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
 {
     var islemler = await _db.Islemler
@@ -210,6 +314,34 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
             }
             return View(model);
         }
+        [HttpGet]
+        public IActionResult GelinmeyenRandevular()
+        {
+            var gelinmeyenRandevular = _db.RandevuDurumlari
+                .Where(d => d.Durum == "Gelinmedi")
+                .Include(d => d.Randevu)
+                .ThenInclude(r => r.Uzman)
+                .Include(d => d.Randevu.Islem)
+                .Select(d => d.Randevu) // Sadece Randevu nesnelerini seçiyoruz
+                .ToList();
+
+            return View(gelinmeyenRandevular);
+        }
+
+        [HttpGet]
+        public IActionResult GelinenRandevular()
+        {
+            var gelinenRandevular = _db.RandevuDurumlari
+                .Where(d => d.Durum == "Gelindi")
+                .Include(d => d.Randevu)
+                .ThenInclude(r => r.Uzman)
+                .Include(d => d.Randevu.Islem)
+                .Select(d => d.Randevu) // Sadece Randevu nesnelerini seçiyoruz
+                .ToList();
+
+            return View(gelinenRandevular);
+        }
+
 
         private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
         {

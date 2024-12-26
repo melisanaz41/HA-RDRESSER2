@@ -1,0 +1,37 @@
+﻿@model IEnumerable<dynamic>
+
+<h2>Randevular</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Randevu ID</th>
+            <th>Uzman</th>
+            <th>İşlem</th>
+            <th>Tarih</th>
+            <th>Saat</th>
+            <th>Durum</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Randevu.Id</td>
+                <td>@item.Randevu.Uzman.Ad @item.Randevu.Uzman.Soyad</td>
+                <td>@item.Randevu.Islem.Ad</td>
+                <td>@item.Randevu.Tarih.ToShortDateString()</td>
+                <td>@item.Randevu.Saat</td>
+                <td>@item.Durum ?? "Belirtilmemiş"</td>
+                <td>
+                    <form asp-action="RandevuDurumuGuncelle" method="post" class="d-inline">
+                        <input type="hidden" name="randevuId" value="@item.Randevu.Id" />
+                        <button type="submit" name="durum" value="Gelindi" class="btn btn-success btn-sm">Gelindi</button>
+                        <button type="submit" name="durum" value="Gelinmedi" class="btn btn-danger btn-sm">Gelinmedi</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

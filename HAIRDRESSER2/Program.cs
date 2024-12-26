@@ -1,6 +1,6 @@
+ï»¿using HAIRDRESSER2.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using HAIRDRESSER2.Models;
 
 internal class Program
 {
@@ -8,14 +8,14 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Veritabaný yapýlandýrmasý
+        // VeritabanÄ± yapÄ±landÄ±rmasÄ±
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Identity yapýlandýrmasý
+        // Identity yapÄ±landÄ±rmasÄ±
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
-            // Þifre politikalarýný burada yapýlandýrabilirsiniz
+            // Åžifre politikalarÄ±nÄ± yapÄ±landÄ±rma
             options.Password.RequireDigit = false;
             options.Password.RequiredLength = 6;
             options.Password.RequireNonAlphanumeric = false;
@@ -25,38 +25,48 @@ internal class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-        // Denetleyiciler ve görünümler
+        // Denetleyiciler ve gÃ¶rÃ¼nÃ¼mler
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
-        // Middleware yapýlandýrmasý
+        // Middleware yapÄ±landÄ±rmasÄ±
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
+        app.UseStaticFiles(); // Statik dosyalarÄ± yÃ¼kleme (wwwroot)
+        app.UseRouting();     // Rota yapÄ±landÄ±rmasÄ±
+        app.UseAuthentication(); // Kimlik doÄŸrulama
+        app.UseAuthorization();  // Yetkilendirme
 
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
-
-        app.UseRouting();
-
-        app.UseAuthentication(); // Kullanýcý kimlik doðrulamasý
-        app.UseAuthorization();  // Kullanýcý yetkilendirmesi
-
-        // Tek bir default route
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        // Rolleri ve Admin kullanýcýyý seed etme iþlemi
+        // KÃ¶k URL yÃ¶nlendirmesi
+        app.MapGet("/", context =>
+        {
+            context.Response.Redirect("/Home/Index", permanent: false);
+            return Task.CompletedTask;
+        });
+
+        // Rolleri ve admin kullanÄ±cÄ±yÄ± seed etme
         await SeedDatabaseAsync(app);
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
 
         app.Run();
     }
 
-    // Veritabaný rolleri ve admin kullanýcýyý seed etme
     private static async Task SeedDatabaseAsync(WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
@@ -71,7 +81,7 @@ internal class Program
                 // Rolleri seed et
                 await SeedRolesAsync(roleManager);
 
-                // Admin kullanýcýyý seed et
+                // Admin kullanÄ±cÄ±yÄ± seed et
                 await SeedAdminUserAsync(userManager);
             }
             catch (Exception ex)
@@ -81,7 +91,6 @@ internal class Program
         }
     }
 
-    // Rolleri ekleyen metod
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
         string[] roleNames = { "Admin", "User" };
@@ -93,29 +102,26 @@ internal class Program
                 var result = await roleManager.CreateAsync(new IdentityRole(roleName));
                 if (!result.Succeeded)
                 {
-                    throw new Exception($"Rol oluþturulurken hata oluþtu: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new Exception($"Rol oluÅŸturulurken hata oluÅŸtu: {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
         }
     }
 
-    // Admin kullanýcýyý ekleyen metod
     private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
     {
         string adminEmail = "admin@example.com";
-        string adminPassword = "Admin123!"; // Þifre
+        string adminPassword = "Admin123!"; // Åžifre
 
-        // Admin kullanýcýsýný kontrol et
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin == null)
         {
-            // Yeni admin kullanýcý oluþtur
             var adminUser = new ApplicationUser
             {
                 UserName = adminEmail,
                 Email = adminEmail,
-                Ad = "Admin", // ApplicationUser modelinizde varsa
-                Soyad = "User", // ApplicationUser modelinizde varsa
+                Ad = "Admin",
+                Soyad = "User",
                 PhoneNumber = "1234567890"
             };
 
@@ -123,16 +129,16 @@ internal class Program
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
-                Console.WriteLine("Admin kullanýcý baþarýyla oluþturuldu.");
+                Console.WriteLine("Admin kullanÄ±cÄ± baÅŸarÄ±yla oluÅŸturuldu.");
             }
             else
             {
-                throw new Exception($"Admin kullanýcý oluþturulamadý: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                throw new Exception($"Admin kullanÄ±cÄ± oluÅŸturulamadÄ±: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
         else
         {
-            Console.WriteLine("Admin kullanýcý zaten mevcut.");
+            Console.WriteLine("Admin kullanÄ±cÄ± zaten mevcut.");
         }
     }
 }

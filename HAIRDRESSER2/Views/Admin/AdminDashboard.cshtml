@@ -1,7 +1,33 @@
 ﻿<h2>Admin Dashboard</h2>
 <p>Merhaba, @User.Identity.Name! Hoş geldiniz.</p>
 
-<a href="/Admin/UzmanListesi" class="btn btn-primary">Uzmanları Yönet</a>
+<h2>Admin Paneli</h2>
+<p>Hoş geldiniz! Buradan sistemle ilgili işlemleri yönetebilirsiniz.</p>
+
+<div class="mt-4">
+    <!-- Mevcut Randevuları Görüntüle -->
+    <a asp-action="Randevular" asp-controller="Admin" class="btn btn-secondary">Mevcut Randevuları Görüntüle</a>
+</div>
+
+<div class="mt-4">
+    <!-- Gelinen Randevuları Görüntüle -->
+    <a asp-action="GelinenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinen Randevuları Görüntüle</a>
+</div>
+
+<div class="mt-4">
+    <!-- Raporlama -->
+    <a asp-action="Raporlama" asp-controller="Admin" class="btn btn-secondary">Raporlama ve Analiz</a>
+</div>
+
+<div class="mt-4">
+    <!-- Uzman Yönetimi -->
+    <a asp-action="UzmanListesi" asp-controller="Admin" class="btn btn-secondary">Uzmanları Yönet</a>
+</div>
+
+<div class="mt-4">
+    <!-- Gelinen ve Gelinmeyen Randevular -->
+    <a asp-action="GelinmeyenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinmeyen Randevuları Görüntüle</a>
+</div>
 
 <form asp-action="Logout" method="post" style="margin-top: 20px;">
     <button type="submit" class="btn btn-danger">Çıkış Yap</button>

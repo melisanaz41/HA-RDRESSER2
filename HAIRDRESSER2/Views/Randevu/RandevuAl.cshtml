@@ -19,11 +19,11 @@
 
         <!-- Tarih Seçimi -->
         <div class="form-group">
-            <label for="tarih">Tarih:</label>
-            <input type="date" id="tarih" name="tarih" class="form-control" required />
+            <label for="tarih" class="form-label">Tarih:</label>
+            <input type="date" id="tarih" name="tarih" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
         </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <!-- Saat Seçimi -->
         <div class="form-group">
             <label for="saat">Saat:</label>
             <input type="time" id="saat" name="saat" class="form-control" required />

@@ -57,13 +57,19 @@ namespace HAIRDRESSER2.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult SubmitRandevu(int uzmanId, DateTime tarih, TimeSpan saat, int islemId)
         {
-            // Parametrelerin loglanması
             Console.WriteLine($"[DEBUG] SubmitRandevu - UzmanId: {uzmanId}, Tarih: {tarih}, Saat: {saat}, IslemId: {islemId}");
 
             if (uzmanId <= 0)
             {
                 Console.WriteLine("[ERROR] UzmanId sıfır veya geçersiz.");
                 ModelState.AddModelError("", "Geçersiz uzman seçimi.");
+                return View("RandevuAl");
+            }
+
+            if (tarih.Date < DateTime.Now.Date)
+            {
+                Console.WriteLine("[ERROR] Geçmiş bir tarih seçildi.");
+                ModelState.AddModelError("", "Seçim yapmak istediğiniz tarih güncel değildir, tekrar deneyiniz.");
                 return View("RandevuAl");
             }
 
@@ -90,14 +96,38 @@ namespace HAIRDRESSER2.Controllers
             var calismaSaati = uzman.CalismaSaati;
             if (calismaSaati == null || saat < calismaSaati.BaslangicSaati || saat >= calismaSaati.BitisSaati)
             {
-                Console.WriteLine("[WARNING] Çalışma saati kontrolü hatalı.");
-                ModelState.AddModelError("", "Seçilen saat çalışma saatleri dışında.");
+                var calismaSaatMesaji = $"Seçtiğiniz randevu saati uzman çalışma saatleri dışındadır. Lütfen {calismaSaati.BaslangicSaati:hh\\:mm} - {calismaSaati.BitisSaati:hh\\:mm} saatleri arasında bir seçim yapınız.";
+                Console.WriteLine($"[WARNING] Çalışma saati kontrolü hatalı: {calismaSaatMesaji}");
+
+                ModelState.AddModelError("", calismaSaatMesaji);
                 ViewBag.SelectedUzman = uzman;
                 ViewBag.Islemler = uzman.Islemler;
                 return View("RandevuAl");
             }
 
-            var randevu = new Randevu
+            // Uzmanın mevcut randevularını kontrol et
+            var randevular = db.Randevular
+                .Where(r => r.UzmanId == uzmanId && r.Tarih == tarih)
+                .ToList();
+
+            foreach (var randevu in randevular)
+            {
+                var randevuBaslangic = randevu.Saat;
+                var randevuBitis = randevu.Saat + TimeSpan.FromMinutes(randevu.Islem.Sure);
+
+                if (saat >= randevuBaslangic && saat < randevuBitis)
+                {
+                    var randevuSaatMesaji = $"Seçmek istediğiniz saatler aralığında uzmanımızın mevcut bir randevusu vardır. Lütfen {calismaSaati.BaslangicSaati:hh\\:mm} - {calismaSaati.BitisSaati:hh\\:mm} saatleri arasında başka bir saat seçiniz.";
+                    Console.WriteLine($"[WARNING] Mevcut randevu çakışması: {randevuSaatMesaji}");
+
+                    ModelState.AddModelError("", randevuSaatMesaji);
+                    ViewBag.SelectedUzman = uzman;
+                    ViewBag.Islemler = uzman.Islemler;
+                    return View("RandevuAl");
+                }
+            }
+
+            var yeniRandevu = new Randevu
             {
                 UzmanId = uzmanId,
                 Tarih = tarih,
@@ -106,7 +136,7 @@ namespace HAIRDRESSER2.Controllers
                 IslemId = islemId
             };
 
-            db.Randevular.Add(randevu);
+            db.Randevular.Add(yeniRandevu);
 
             try
             {
@@ -122,7 +152,7 @@ namespace HAIRDRESSER2.Controllers
                 return View("RandevuAl");
             }
 
-            return RedirectToAction("Onay", new { id = randevu.Id });
+            return RedirectToAction("Onay", new { id = yeniRandevu.Id });
         }
 
 

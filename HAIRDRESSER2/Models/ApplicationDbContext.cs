@@ -14,6 +14,8 @@ namespace HAIRDRESSER2.Models
         public DbSet<Randevu> Randevular { get; set; }
         public DbSet<CalismaSaati> CalismaSaatleri { get; set; }
         public DbSet<UzmanlikAlani> UzmanlikAlanlari { get; set; }
+        public DbSet<RandevuDurumu> RandevuDurumlari { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +26,7 @@ namespace HAIRDRESSER2.Models
             modelBuilder.Entity<Randevu>().ToTable("Randevular");
             modelBuilder.Entity<CalismaSaati>().ToTable("CalismaSaatleri");
             modelBuilder.Entity<Islem>().ToTable("Islemler");
+            modelBuilder.Entity<RandevuDurumu>().ToTable("RandevuDurumlari");
 
 
             modelBuilder.Entity<Randevu>()

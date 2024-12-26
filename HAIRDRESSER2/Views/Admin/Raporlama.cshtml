@@ -1,0 +1,27 @@
+﻿@model dynamic
+
+<h2>Raporlama</h2>
+
+<p><strong>Toplam Kazanç:</strong> @Model.ToplamKazanc.ToString("C")</p>
+<p><strong>Toplam Gelinen Randevu Sayısı:</strong> @Model.ToplamGelinenRandevu</p>
+
+<h3>Uzman Bazlı Rapor</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Uzman</th>
+            <th>Randevu Sayısı</th>
+            <th>Toplam Kazanç</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rapor in Model.UzmanRaporlari)
+        {
+            <tr>
+                <td>@rapor.Uzman.Ad @rapor.Uzman.Soyad</td>
+                <td>@rapor.RandevuSayisi</td>
+                <td>@rapor.ToplamKazanc.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
