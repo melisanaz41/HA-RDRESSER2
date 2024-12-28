@@ -27,7 +27,12 @@ namespace HAIRDRESSER2.Controllers
 
             if (uzmanId <= 0)
             {
-                var uzmanlar = db.Uzmanlar.Include(u => u.UzmanlikAlani).ToList();
+                var uzmanlar = db.Uzmanlar
+     .Include(u => u.UzmanlikAlani) // Uzmanlık alanını dahil et
+     .Include(u => u.CalismaSaati)  // Çalışma saatlerini dahil et
+     .Include(u => u.Islemler)      // Örneğin, uzman ile ilgili işlemleri dahil et
+     .ToList();
+
                 if (!uzmanlar.Any())
                 {
                     return Content("Hiç uzman bulunamadı.");

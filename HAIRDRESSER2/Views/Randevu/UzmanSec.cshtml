@@ -11,6 +11,7 @@
                 <th>Ad</th>
                 <th>Uzmanlık Alanı</th>
                 <th>Çalışma Saatleri</th>
+                <th>Yaptığı İşlemler</th>
                 <th>Seç</th>
             </tr>
         </thead>
@@ -19,11 +20,26 @@
             {
                 <tr>
                     <td>@uzman.Ad @uzman.Soyad</td>
-                    <td>@uzman.UzmanlikAlani?.Ad ?? "Bilinmiyor"</td>
+                    <td>@uzman.UzmanlikAlani?.Ad </td>
                     <td>
                         @(uzman.CalismaSaati != null
                             ? $"{uzman.CalismaSaati.BaslangicSaati:hh\\:mm} - {uzman.CalismaSaati.BitisSaati:hh\\:mm}"
                             : "Bilinmiyor")
+                    </td>
+                    <td>
+                        @if (uzman.Islemler != null && uzman.Islemler.Any())
+                        {
+                            <ul>
+                                @foreach (var islem in uzman.Islemler)
+                                {
+                                    <li>@islem.Ad (@islem.Fiyat.ToString("C")) - @islem.Sure dk</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>Bilinmiyor</span>
+                        }
                     </td>
                     <td>
                         <a asp-controller="Randevu" asp-action="RandevuAl" asp-route-uzmanId="@uzman.Id" class="btn btn-primary">Seç</a>

@@ -87,15 +87,16 @@ namespace HAIRDRESSER2.Controllers
                 return Unauthorized();
             }
 
-            // İlişkili tabloları yükleyin
+            // İlişkili tabloları yüklemeden, sadece temel sorgu
             var randevular = _db.Randevular
-                .Include(r => r.Uzman) // Uzman tablosunu dahil et
-                .Include(r => r.Islem) // İşlem tablosunu dahil et
                 .Where(r => r.KullaniciId == kullaniciId)
+                .Include(r => r.Uzman) // Uzman bilgilerini dahil et
+                .Include(r => r.Islem) // İşlem bilgilerini dahil et
                 .ToList();
 
             return View(randevular);
         }
+
 
 
         // Kullanıcı profilini düzenleme sayfası
