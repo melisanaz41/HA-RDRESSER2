@@ -1,0 +1,81 @@
+﻿@model HAIRDRESSER2.Models.UzmanViewModel
+
+<h2>Uzman Güncelle</h2>
+
+<div id="form-container">
+    <input type="hidden" id="uzman-id" value="@Model.Uzman.Id" />
+    <div class="form-group">
+        <label for="ad">Ad</label>
+        <input id="ad" value="@Model.Uzman.Ad" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="soyad">Soyad</label>
+        <input id="soyad" value="@Model.Uzman.Soyad" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="uzmanlikAlaniId">Uzmanlık Alanı</label>
+        <select id="uzmanlikAlaniId" class="form-control" required>
+            <option value="">Seçiniz</option>
+            @foreach (var alan in Model.UzmanlikAlanlari)
+            {
+                if (alan.Value == Model.Uzman.UzmanlikAlaniId.ToString())
+                {
+                            <option value="@alan.Value" selected>@alan.Text</option>
+                }
+                else
+                {
+                            <option value="@alan.Value">@alan.Text</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="telefon">Telefon</label>
+        <input id="telefon" value="@Model.Uzman.Telefon" class="form-control" required />
+    </div>
+    <button type="button" id="submit-btn" class="btn btn-primary">Kaydet</button>
+</div>
+
+<script>
+    document.getElementById("submit-btn").addEventListener("click", async () => {
+        const uzmanId = document.getElementById("uzman-id").value;
+        const ad = document.getElementById("ad").value.trim();
+        const soyad = document.getElementById("soyad").value.trim();
+        const uzmanlikAlaniId = document.getElementById("uzmanlikAlaniId").value.trim();
+        const telefon = document.getElementById("telefon").value.trim();
+
+        if (!ad || !soyad || !uzmanlikAlaniId || !telefon) {
+            alert("Lütfen tüm alanları doldurun.");
+            return;
+        }
+
+        const uzmanData = {
+            id: parseInt(uzmanId),
+            ad: ad,
+            soyad: soyad,
+            uzmanlikAlaniId: parseInt(uzmanlikAlaniId),
+            telefon: telefon,
+        };
+
+        try {
+            const response = await fetch(`/api/uzmanlar/${uzmanId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(uzmanData),
+            });
+
+            if (response.ok) {
+                alert("Uzman başarıyla güncellendi!");
+                window.location.href = "/Admin/UzmanListesi";
+            } else {
+                const error = await response.json();
+                alert(`Hata: ${error.message}`);
+            }
+        } catch (err) {
+            console.error("Bir hata oluştu:", err);
+            alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+        }
+    });
+</script>

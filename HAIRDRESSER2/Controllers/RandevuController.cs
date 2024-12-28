@@ -52,6 +52,7 @@ namespace HAIRDRESSER2.Controllers
             return View();
         }
 
+
         // Randevu alma işlemi (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -170,5 +171,8 @@ namespace HAIRDRESSER2.Controllers
 
             return View(randevu);
         }
+    
+
+
     }
 }

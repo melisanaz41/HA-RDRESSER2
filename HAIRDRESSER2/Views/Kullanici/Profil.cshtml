@@ -33,6 +33,7 @@
                 <th>Saat</th>
                 <th>Uzman Adı</th>
                 <th>Uzman Soyadı</th>
+                <th>İşlemler</th>
             </tr>
         </thead>
         <tbody>
@@ -43,6 +44,12 @@
                     <td>@randevu.Saat</td>
                     <td>@randevu.Uzman.Ad</td>
                     <td>@randevu.Uzman.Soyad</td>
+                    <td>
+                        <form asp-action="RandevuIptal" asp-controller="Kullanici" method="post" style="display:inline;">
+                            <input type="hidden" name="randevuId" value="@randevu.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?');">İptal Et</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -84,26 +91,31 @@ else
         const reader = new FileReader();
         reader.onload = async () => {
             const base64Photo = reader.result.split(',')[1]; // Fotoğrafı Base64 olarak al
-            const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ PhotoBase64: base64Photo })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const recommendationList = document.getElementById('recommendationList');
-                recommendationList.innerHTML = ''; // Önceki önerileri temizle
-                data.Recommendations.forEach(rec => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = rec;
-                    recommendationList.appendChild(listItem);
+            try {
+                const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ PhotoBase64: base64Photo })
                 });
-                document.getElementById('recommendations').style.display = 'block';
-            } else {
-                alert('Öneriler alınırken bir hata oluştu.');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const recommendationList = document.getElementById('recommendationList');
+                    recommendationList.innerHTML = ''; // Önceki önerileri temizle
+                    data.Recommendations.forEach(rec => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = rec;
+                        recommendationList.appendChild(listItem);
+                    });
+                    document.getElementById('recommendations').style.display = 'block';
+                } else {
+                    alert('Öneriler alınırken bir hata oluştu.');
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
             }
         };
 

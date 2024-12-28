@@ -11,14 +11,13 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // OpenAI API Anahtarını yapılandırma
+        string openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         builder.Services.AddHttpClient("OpenAIAPI", client =>
         {
             client.BaseAddress = new Uri("https://api.openai.com/v1/");
-            string apiKey = "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"; // API anahtarınızı burada belirtin
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-            Debug.WriteLine($"API Anahtarı Kullanılıyor: {apiKey}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiApiKey);
         });
+
 
 
         // Veritabanı yapılandırması

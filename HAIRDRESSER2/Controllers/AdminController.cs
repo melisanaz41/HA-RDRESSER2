@@ -123,20 +123,6 @@ namespace HAIRDRESSER2.Controllers
         }
 
         // Randevu silme işlemi
-        [HttpPost]
-        public IActionResult RandevuSil(int id)
-        {
-            var randevu = _db.Randevular.FirstOrDefault(r => r.Id == id);
-            if (randevu == null)
-            {
-                return NotFound("Randevu bulunamadı.");
-            }
-
-            _db.Randevular.Remove(randevu);
-            _db.SaveChanges();
-
-            return RedirectToAction("Randevular");
-        }
     
 
 
@@ -203,7 +189,6 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
             viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
             return View(viewModel);
         }
-
         [HttpGet]
         public async Task<IActionResult> UzmanGuncelle(int id)
         {
@@ -219,63 +204,120 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
 
             var viewModel = await CreateUzmanViewModelAsync(uzman.UzmanlikAlaniId, uzman.CalismaSaatiId);
             viewModel.Uzman = uzman;
-            return View(viewModel);
+
+            return View(viewModel); // UzmanViewModel gönderiliyor
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UzmanGuncelle(UzmanViewModel viewModel)
+
+        [HttpPut("api/uzmanlar/{id}")]
+        public async Task<IActionResult> UpdateUzman(int id, [FromBody] Uzman updatedUzman)
         {
-            if (ModelState.IsValid)
+            // ID doğrulama
+            if (id != updatedUzman.Id)
             {
-                try
-                {
-                    _db.Uzmanlar.Update(viewModel.Uzman);
-
-                    // Uzmanlık alanına ait işlemleri güncelle
-                    var islemler = await _db.Islemler
-                                            .Where(i => i.UzmanlikAlaniId == viewModel.Uzman.UzmanlikAlaniId)
-                                            .ToListAsync();
-
-                    viewModel.Uzman.Islemler = islemler;
-
-                    await _db.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Uzman başarıyla güncellendi.";
-                    return RedirectToAction("UzmanListesi");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Uzman güncellenirken bir hata oluştu.");
-                    ModelState.AddModelError("", "Bir hata oluştu. Lütfen tekrar deneyin.");
-                }
+                return BadRequest(new { message = "Uzman ID uyuşmuyor." });
             }
 
-            viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
-            return View(viewModel);
-        }
+            // Mevcut uzmanı bulma
+            var mevcutUzman = await _db.Uzmanlar.FirstOrDefaultAsync(u => u.Id == id);
+            if (mevcutUzman == null)
+            {
+                return NotFound(new { message = "Uzman bulunamadı." });
+            }
 
+            // Güncelleme işlemi
+            mevcutUzman.Ad = updatedUzman.Ad;
+            mevcutUzman.Soyad = updatedUzman.Soyad;
+            mevcutUzman.UzmanlikAlaniId = updatedUzman.UzmanlikAlaniId;
+            mevcutUzman.Telefon = updatedUzman.Telefon;
+
+            try
+            {
+                // Veritabanında değişiklikleri kaydet
+                _db.Uzmanlar.Update(mevcutUzman); // Güncellenen kaydı işaretlemek için Update çağrısı
+                await _db.SaveChangesAsync();
+
+                return Ok(new { message = "Uzman başarıyla güncellendi.", uzman = mevcutUzman });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return StatusCode(500, new { message = "Veritabanı güncelleme hatası.", error = dbEx.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Bir hata oluştu.", error = ex.Message });
+            }
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UzmanSil(int id)
         {
             try
             {
-                var uzman = await _db.Uzmanlar.FindAsync(id);
-                if (uzman != null)
+                // İlgili uzmanı bulun
+                var uzman = await _db.Uzmanlar.FirstOrDefaultAsync(u => u.Id == id);
+
+                if (uzman == null)
                 {
-                    _db.Uzmanlar.Remove(uzman);
-                    await _db.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Uzman başarıyla silindi.";
+                    TempData["ErrorMessage"] = "Uzman bulunamadı.";
+                    return RedirectToAction("UzmanListesi");
                 }
+
+                // Uzman ile ilişkili randevuları bulun
+                var randevular = await _db.Randevular
+                                          .Where(r => r.UzmanId == id)
+                                          .ToListAsync();
+
+                // Uzman ile ilişkili randevuları sil
+                if (randevular.Any())
+                {
+                    _db.Randevular.RemoveRange(randevular);
+                }
+
+                // Uzmanı sil
+                _db.Uzmanlar.Remove(uzman);
+
+                // Veritabanına değişiklikleri kaydet
+                await _db.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Uzman ve ilişkili randevular başarıyla silindi.";
             }
             catch (Exception ex)
             {
+                // Hata durumunda loglama ve mesaj
                 _logger.LogError(ex, "Uzman silinirken bir hata oluştu.");
                 TempData["ErrorMessage"] = "Uzman silinirken bir hata oluştu. Lütfen tekrar deneyin.";
             }
 
             return RedirectToAction("UzmanListesi");
         }
+
+        public async Task<IActionResult> UzmanDetay(int id)
+        {
+            var uzman = await _db.Uzmanlar
+                .Include(u => u.UzmanlikAlani) // Uzmanlık alanını dahil et
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (uzman == null)
+            {
+                return NotFound("Uzman bulunamadı.");
+            }
+
+            var randevular = await _db.Randevular
+                .Where(r => r.UzmanId == id)
+                .ToListAsync();
+
+            var viewModel = new UzmanViewModel
+            {
+                Uzman = uzman,
+                Randevular = randevular
+            };
+
+            return View(viewModel);
+        }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -342,6 +384,31 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
             return View(gelinenRandevular);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RandevuSil(int id)
+        {
+            var randevu = await _db.Randevular.FindAsync(id);
+            if (randevu == null)
+            {
+                TempData["ErrorMessage"] = "Randevu bulunamadı.";
+                return RedirectToAction("Randevular");
+            }
+
+            try
+            {
+                _db.Randevular.Remove(randevu);
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Randevu başarıyla silindi.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Randevu silinirken bir hata oluştu.");
+                TempData["ErrorMessage"] = "Randevu silinirken bir hata oluştu. Lütfen tekrar deneyin.";
+            }
+
+            return RedirectToAction("Randevular");
+        }
 
         private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
         {

@@ -67,7 +67,7 @@ namespace HAIRDRESSER2.Controllers
             var user = _db.Users.FirstOrDefault(u => u.Id == userId);
             if (user != null)
             {
-                user.ProfilePhotoPath = fileName;
+              //  user.ProfilePhotoPath = fileName;
                 _db.SaveChanges();
             }
 
@@ -87,12 +87,16 @@ namespace HAIRDRESSER2.Controllers
                 return Unauthorized();
             }
 
+            // İlişkili tabloları yükleyin
             var randevular = _db.Randevular
+                .Include(r => r.Uzman) // Uzman tablosunu dahil et
+                .Include(r => r.Islem) // İşlem tablosunu dahil et
                 .Where(r => r.KullaniciId == kullaniciId)
                 .ToList();
 
             return View(randevular);
         }
+
 
         // Kullanıcı profilini düzenleme sayfası
         [HttpGet]
@@ -114,6 +118,54 @@ namespace HAIRDRESSER2.Controllers
 
             return View(kullanici);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RandevuIptal(int randevuId)
+        {
+            var randevu = _db.Randevular.FirstOrDefault(r => r.Id == randevuId);
+            if (randevu == null)
+            {
+                return NotFound("Randevu bulunamadı.");
+            }
+
+            try
+            {
+                _db.Randevular.Remove(randevu);
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Randevu başarıyla iptal edildi.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Randevu iptal edilirken bir hata oluştu.";
+               // _logger.LogError(ex, "Randevu iptal edilirken bir hata oluştu.");
+            }
+
+            return RedirectToAction("Randevularim", "Kullanici");
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RandevuIptalConfirmed(int id)
+        {
+            var randevu = _db.Randevular.FirstOrDefault(r => r.Id == id);
+
+            if (randevu == null)
+            {
+                TempData["ErrorMessage"] = "Randevu bulunamadı.";
+                return RedirectToAction("Randevularim");
+            }
+
+            _db.Randevular.Remove(randevu);
+            _db.SaveChanges();
+            TempData["SuccessMessage"] = "Randevu başarıyla iptal edildi.";
+
+            return RedirectToAction("Randevularim");
+        }
+
+
+
 
         // Kullanıcı profilini düzenleme işlemi
         [HttpPost]

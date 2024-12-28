@@ -11,26 +11,40 @@
             <th>Tarih</th>
             <th>Saat</th>
             <th>Durum</th>
-            <th>İşlem</th>
+            <th>İşlemler</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Randevu.Id</td>
+                    <td>@(item.Randevu.Uzman != null ? $"{item.Randevu.Uzman.Ad} {item.Randevu.Uzman.Soyad}" : "Bilinmiyor")</td>
+                    <td>@(item.Randevu.Islem?.Ad ?? "Bilinmiyor")</td>
+                    <td>@item.Randevu.Tarih.ToShortDateString()</td>
+                    <td>@item.Randevu.Saat.ToString(@"hh\:mm")</td>
+                    <td>@(item.Durum ?? "Belirtilmemiş")</td>
+                    <td>
+                        <form asp-action="RandevuDurumuGuncelle" method="post" class="d-inline">
+                            <input type="hidden" name="randevuId" value="@item.Randevu.Id" />
+                            <button type="submit" name="durum" value="Gelindi" class="btn btn-success btn-sm">Gelindi</button>
+                            <button type="submit" name="durum" value="Gelinmedi" class="btn btn-danger btn-sm">Gelinmedi</button>
+                        </form>
+                        <form asp-action="RandevuSil" asp-route-id="@item.Randevu.Id" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu randevuyu silmek istediğinize emin misiniz?');">
+                                Sil
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@item.Randevu.Id</td>
-                <td>@item.Randevu.Uzman.Ad @item.Randevu.Uzman.Soyad</td>
-                <td>@item.Randevu.Islem.Ad</td>
-                <td>@item.Randevu.Tarih.ToShortDateString()</td>
-                <td>@item.Randevu.Saat</td>
-                <td>@item.Durum ?? "Belirtilmemiş"</td>
-                <td>
-                    <form asp-action="RandevuDurumuGuncelle" method="post" class="d-inline">
-                        <input type="hidden" name="randevuId" value="@item.Randevu.Id" />
-                        <button type="submit" name="durum" value="Gelindi" class="btn btn-success btn-sm">Gelindi</button>
-                        <button type="submit" name="durum" value="Gelinmedi" class="btn btn-danger btn-sm">Gelinmedi</button>
-                    </form>
-                </td>
+                <td colspan="7" class="text-center text-danger">Hiç randevu bulunamadı.</td>
             </tr>
         }
     </tbody>

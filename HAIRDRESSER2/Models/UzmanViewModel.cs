@@ -8,5 +8,7 @@ namespace HAIRDRESSER2.Models
         public Uzman Uzman { get; set; }
         public SelectList UzmanlikAlanlari { get; set; }
         public SelectList CalismaSaatleri { get; set; }
+
+        public List<Randevu> Randevular { get; set; } // İlişkili randevular
     }
 }

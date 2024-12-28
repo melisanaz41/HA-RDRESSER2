@@ -1,0 +1,23 @@
+﻿@model HAIRDRESSER2.Models.Randevu
+
+<h2>Randevu İptal</h2>
+<div class="alert alert-warning">
+    <strong>Dikkat!</strong> Bu randevuyu iptal etmek üzeresiniz. Bu işlem geri alınamaz.
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Randevu Bilgileri</h5>
+        <p><strong>Uzman:</strong> @(Model.Uzman != null ? $"{Model.Uzman.Ad} {Model.Uzman.Soyad}" : "Bilgi mevcut değil")</p>
+        <p><strong>Tarih:</strong> @Model.Tarih.ToString("dd.MM.yyyy")</p>
+        <p><strong>Saat:</strong> @Model.Saat.ToString("hh\\:mm")</p>
+    </div>
+</div>
+
+<form asp-action="RandevuIptal" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="mb-3">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?');">Randevuyu İptal Et</button>
+        <a asp-action="Randevularim" class="btn btn-secondary">Geri Dön</a>
+    </div>
+</form>

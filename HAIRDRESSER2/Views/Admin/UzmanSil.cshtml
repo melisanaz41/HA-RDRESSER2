@@ -1,0 +1,24 @@
+﻿@model HAIRDRESSER2.Models.Uzman
+
+<h2>Uzman Sil</h2>
+
+<div class="alert alert-warning">
+    <strong>Uyarı!</strong> Bu uzmanı silmek üzeresiniz. Bu işlem geri alınamaz.
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Uzman Bilgileri</h5>
+        <p><strong>Ad:</strong> @Model.Ad</p>
+        <p><strong>Soyad:</strong> @Model.Soyad</p>
+        <p><strong>Uzmanlık Alanı:</strong> @(Model.UzmanlikAlani?.Ad ?? "Bilinmiyor")</p>
+        <p><strong>Telefon:</strong> @Model.Telefon</p>
+        <p><strong>Eklenme Tarihi:</strong> @(Model.EklenmeTarihi.ToShortDateString() ?? "Bilinmiyor")</p>
+    </div>
+</div>
+
+<form asp-action="UzmanSil" asp-route-id="@Model.Id" method="post" style="display:inline;">
+    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu uzmanı silmek istediğinize emin misiniz?');">
+        Sil
+    </button>
+</form>

@@ -29,6 +29,8 @@ namespace HAIRDRESSER2.Models
             modelBuilder.Entity<RandevuDurumu>().ToTable("RandevuDurumlari");
 
 
+
+
             modelBuilder.Entity<Randevu>()
         .HasOne(r => r.Islem)
         .WithMany()
