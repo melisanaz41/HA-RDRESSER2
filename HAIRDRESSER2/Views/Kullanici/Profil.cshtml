@@ -12,6 +12,11 @@
         <a class="btn btn-primary" asp-controller="Kullanici" asp-action="Profil">Profilim</a>
         <a class="btn btn-secondary" asp-controller="Kullanici" asp-action="Randevularim">Randevularım</a>
         <a class="btn btn-success" asp-controller="Randevu" asp-action="RandevuAl">Randevu Al</a>
+
+        <!-- Oturumu Kapat Butonu -->
+        <form asp-action="Logout" asp-controller="Kullanici" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Oturumu Kapat</button>
+        </form>
     </div>
 </div>
 
@@ -63,62 +68,13 @@ else
 <hr />
 
 <h3>Saç Modeli Önerisi</h3>
-<p>Bir fotoğraf yükleyerek sizin için en uygun saç modelini keşfedin.</p>
-
-<form id="photoUploadForm" enctype="multipart/form-data">
-    <div>
-        <label for="photo">Fotoğraf Yükle:</label>
-        <input type="file" id="photo" accept="image/*" required />
-    </div>
-    <button type="button" id="submitButton" class="btn btn-primary mt-2">Önerileri Al</button>
-</form>
-
-<div id="recommendations" style="margin-top: 20px; display: none;">
-    <h3>Öneriler:</h3>
-    <ul id="recommendationList"></ul>
+<p>Bir fotoğraf yükleyerek sizin için en uygun saç modelini keşfetmek için aşağıdaki butona tıklayın:</p>
+<!-- Amblem fotoğrafını ekliyoruz -->
+<div class="amblem-container">
+    <img src="~/images/kuaför.jpg" alt="Amblem" class="amblem">
 </div>
 
-<script>
-    document.getElementById('submitButton').addEventListener('click', async () => {
-        const fileInput = document.getElementById('photo');
-        const file = fileInput.files[0];
 
-        if (!file) {
-            alert('Lütfen bir fotoğraf seçin.');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const base64Photo = reader.result.split(',')[1]; // Fotoğrafı Base64 olarak al
-            try {
-                const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ PhotoBase64: base64Photo })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const recommendationList = document.getElementById('recommendationList');
-                    recommendationList.innerHTML = ''; // Önceki önerileri temizle
-                    data.Recommendations.forEach(rec => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = rec;
-                        recommendationList.appendChild(listItem);
-                    });
-                    document.getElementById('recommendations').style.display = 'block';
-                } else {
-                    alert('Öneriler alınırken bir hata oluştu.');
-                }
-            } catch (error) {
-                console.error('Hata:', error);
-                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
-            }
-        };
-
-        reader.readAsDataURL(file); // Fotoğrafı Base64 formatına çevir
-    });
-</script>
+<a class="btn btn-primary" asp-controller="API" asp-action="Index">
+    Saç Modeli Önerisi Al
+</a>

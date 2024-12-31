@@ -50,7 +50,11 @@ namespace HAIRDRESSER2.Models
             modelBuilder.Entity<Islem>()
     .Property(i => i.Fiyat)
     .HasColumnType("decimal(18,2)");
-
+            modelBuilder.Entity<Islem>()
+        .HasOne(i => i.Uzman)
+        .WithMany(u => u.Islemler)
+        .HasForeignKey(i => i.UzmanId)
+        .OnDelete(DeleteBehavior.SetNull); // Uzman silinince UzmanId null yapılır
             // Uzman ile UzmanlikAlani arasındaki ilişki
             modelBuilder.Entity<Uzman>()
                 .HasOne(u => u.UzmanlikAlani)
@@ -95,14 +99,14 @@ namespace HAIRDRESSER2.Models
 
 
 );
-           // UzmanlikAlanlari ön tanımlı veriler
-           modelBuilder.Entity<UzmanlikAlani>().HasData(
-                new UzmanlikAlani { Id = 1, Ad = "Saç" },
-                new UzmanlikAlani { Id = 2, Ad = "Makyaj" },
-                new UzmanlikAlani { Id = 3, Ad = "Tırnak" },
-                new UzmanlikAlani { Id = 4, Ad = "Cilt Bakımı" },
-                new UzmanlikAlani { Id = 5, Ad = "Lazer" }
-            );
+            // UzmanlikAlanlari ön tanımlı veriler
+            modelBuilder.Entity<UzmanlikAlani>().HasData(
+                 new UzmanlikAlani { Id = 1, Ad = "Saç" },
+                 new UzmanlikAlani { Id = 2, Ad = "Makyaj" },
+                 new UzmanlikAlani { Id = 3, Ad = "Tırnak" },
+                 new UzmanlikAlani { Id = 4, Ad = "Cilt Bakımı" },
+                 new UzmanlikAlani { Id = 5, Ad = "Lazer" }
+             );
 
             // Çalışma saatleri ön tanımlı veriler
             modelBuilder.Entity<CalismaSaati>().HasData(

@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Oturum Kapatma";
+}
+
+<h2>Oturum Kapatma</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<p>Oturumunuz başarıyla kapatılacaktır. Lütfen aşağıdaki butona tıklayın.</p>
+
+<form asp-controller="Kullanici" asp-action="Logout" method="post">
+    <button type="submit" class="btn btn-danger">Oturumu Kapat</button>
+</form>
+
+<p>Ya da <a href="@Url.Action("Profil", "Kullanici")">giriş sayfasına dönebilirsiniz.</a></p>

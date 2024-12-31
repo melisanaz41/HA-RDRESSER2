@@ -1,0 +1,20 @@
+﻿﻿<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-lg" style="width: 28rem;">
+        <div class="card-body text-center">
+            <h3 class="card-title text-warning">İşlenmiş Resim</h3>
+            <div class="mt-4">
+                @if (ViewBag.ProcessedImage != null)
+                {
+                    <img src="@ViewBag.ProcessedImage" alt="Processed Image"
+                         class="img-fluid rounded"
+                         style="max-width: 100%; max-height: 400px;" />
+                }
+                else
+                {
+                    <p class="text-danger">Resim işlenemedi.</p>
+                }
+            </div>
+            <a href="/API/Index" class="btn btn-secondary mt-3 w-100">Geri Dön</a>
+        </div>
+    </div>
+</div>

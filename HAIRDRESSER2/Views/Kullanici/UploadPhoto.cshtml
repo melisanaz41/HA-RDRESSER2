@@ -33,48 +33,43 @@
             return;
         }
 
-        // Fotoğrafı yüklemeden önce kullanıcıyı bilgilendir
-        document.getElementById('loading').style.display = 'block';
+        const maxFileSize = 5 * 1024 * 1024; // 5 MB
+        if (file.size > maxFileSize) {
+            alert('Fotoğraf boyutu 5 MB’den büyük olamaz.');
+            return;
+        }
 
-        const reader = new FileReader();
-        reader.onload = async () => {
-            try {
-                const base64Photo = reader.result.split(',')[1]; // Fotoğrafı Base64 olarak al
+        document.getElementById('loadingMessage').style.display = 'block';
 
-                const response = await fetch('/api/Recommendation/GetHairStyleRecommendation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ PhotoBase64: base64Photo })
-                });
+        const formData = new FormData();
+        formData.append('image_target', file);  // Resmi form verisine ekliyoruz
+        formData.append('hair_type', '101');  // İstediğiniz saç tipi kodunu buraya ekleyin (örneğin: '101' Bangs)
 
-                if (response.ok) {
-                    const data = await response.json();
+        try {
+            const response = await fetch('/api/upload-photo', {
+                method: 'POST',
+                headers: {
+                    'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY',  // RapidAPI Anahtarınızı buraya ekleyin
+                    'X-RapidAPI-Host': 'hairstyle-changer.p.rapidapi.com',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            });
 
-                    // Önerileri listeye ekle
-                    const recommendationList = document.getElementById('recommendationList');
-                    recommendationList.innerHTML = ''; // Önceki önerileri temizle
-                    data.Recommendations.forEach(rec => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = rec;
-                        recommendationList.appendChild(listItem);
-                    });
+            document.getElementById('loadingMessage').style.display = 'none';
 
-                    document.getElementById('recommendations').style.display = 'block';
-                } else {
-                    // API'den hata mesajını al ve göster
-                    const errorData = await response.json();
-                    alert(errorData.Message || 'Öneriler alınırken bir hata oluştu.');
-                }
-            } catch (error) {
-                alert('Bir hata oluştu: ' + error.message);
-            } finally {
-                // Yükleme göstergesini gizle
-                document.getElementById('loading').style.display = 'none';
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API Yanıtı:', data);
+                // Burada gelen yanıtı işleyeceğiniz alanı ekleyebilirsiniz.
+            } else {
+                alert('Öneriler alınırken bir hata oluştu.');
             }
-        };
-
-        reader.readAsDataURL(file); // Fotoğrafı Base64 formatına çevir
+        } catch (error) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            console.error('Hata:', error);
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+        }
     });
+
 </script>

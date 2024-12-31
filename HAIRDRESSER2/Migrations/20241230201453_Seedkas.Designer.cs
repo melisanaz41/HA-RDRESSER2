@@ -4,6 +4,7 @@ using HAIRDRESSER2.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HAIRDRESSER2.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241230201453_Seedkas")]
+    partial class Seedkas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -530,6 +533,11 @@ namespace HAIRDRESSER2.Migrations
                         {
                             Id = 5,
                             Ad = "Lazer"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Ad = "Kaş"
                         });
                 });
 
@@ -668,18 +676,15 @@ namespace HAIRDRESSER2.Migrations
 
             modelBuilder.Entity("HAIRDRESSER2.Models.Islem", b =>
                 {
-                    b.HasOne("HAIRDRESSER2.Models.Uzman", "Uzman")
+                    b.HasOne("HAIRDRESSER2.Models.Uzman", null)
                         .WithMany("Islemler")
-                        .HasForeignKey("UzmanId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("UzmanId");
 
                     b.HasOne("HAIRDRESSER2.Models.UzmanlikAlani", "UzmanlikAlani")
                         .WithMany("Islemler")
                         .HasForeignKey("UzmanlikAlaniId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Uzman");
 
                     b.Navigation("UzmanlikAlani");
                 });

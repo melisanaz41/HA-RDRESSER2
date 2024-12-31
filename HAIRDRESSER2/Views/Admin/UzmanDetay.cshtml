@@ -2,35 +2,3 @@
 
 <h2>@Model.Uzman.Ad @Model.Uzman.Soyad</h2>
 <p>Uzmanlık Alanı: @(Model.Uzman.UzmanlikAlani?.Ad ?? "Bilinmiyor")</p>
-
-<h3>Randevular</h3>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Randevu ID</th>
-            <th>Tarih</th>
-            <th>Saat</th>
-            <th>İşlem</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Randevular != null && Model.Randevular.Any())
-        {
-            foreach (var randevu in Model.Randevular)
-            {
-                <tr>
-                    <td>@randevu.Id</td>
-                    <td>@randevu.Tarih.ToShortDateString()</td>
-                    <td>@randevu.Saat</td>
-                    <td>@(randevu.Islem?.Ad ?? "Bilinmiyor")</td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="4" class="text-center">Randevu bulunamadı.</td>
-            </tr>
-        }
-    </tbody>
-</table>

@@ -1,0 +1,14 @@
+﻿@{
+    ViewBag.Title = "Admin Logout";
+}
+
+<h2>Admin Çıkış Yap</h2>
+
+<p>Çıkış yapmak üzeresiniz. Devam etmek için aşağıdaki butona tıklayın.</p>
+
+<form asp-controller="Admin" asp-action="Logout" method="post">
+    <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+</form>
+
+<hr />
+<p><a asp-controller="Admin" asp-action="AdminDashboard">İptal</a> - Admin paneline geri dön.</p>

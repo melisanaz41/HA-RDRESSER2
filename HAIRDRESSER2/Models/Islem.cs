@@ -10,6 +10,9 @@
         public UzmanlikAlani UzmanlikAlani { get; set; } // Uzmanlık alanı
         public int Sure { get; set; } // İşlem süresi 
 
+        public int? UzmanId { get; set; } // Uzman ID (nullable)
+        public Uzman Uzman { get; set; } // Uzman ile ilişki
+
 
     }
 }

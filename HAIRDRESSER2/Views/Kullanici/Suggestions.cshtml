@@ -1,0 +1,12 @@
+﻿@model string
+
+<h2>Önerilen Saç Stili</h2>
+@if (!string.IsNullOrEmpty(Model))
+{
+    <p>API Yanıtı:</p>
+    <pre>@Model</pre>
+}
+else
+{
+    <p>Herhangi bir sonuç bulunamadı.</p>
+}

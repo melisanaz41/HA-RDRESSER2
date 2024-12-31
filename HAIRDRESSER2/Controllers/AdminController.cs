@@ -64,6 +64,7 @@ namespace HAIRDRESSER2.Controllers
         [HttpGet]
         public IActionResult Raporlama()
         {
+            // Gelinen randevular ve ilgili işlemler
             var gelinenRandevular = _db.RandevuDurumlari
                 .Where(d => d.Durum == "Gelindi")
                 .Include(d => d.Randevu)
@@ -71,9 +72,11 @@ namespace HAIRDRESSER2.Controllers
                 .Include(d => d.Randevu.Uzman)
                 .ToList();
 
+            // Toplam kazancı hesapla
             var toplamKazanc = gelinenRandevular.Sum(r => r.Randevu.Islem.Fiyat);
             var toplamGelinenRandevu = gelinenRandevular.Count;
 
+            // Uzman bazında raporlama: her bir uzmanın toplam randevu sayısı ve kazancı
             var uzmanRaporlari = gelinenRandevular
                 .GroupBy(r => r.Randevu.Uzman)
                 .Select(g => new
@@ -81,16 +84,41 @@ namespace HAIRDRESSER2.Controllers
                     Uzman = g.Key,
                     RandevuSayisi = g.Count(),
                     ToplamKazanc = g.Sum(r => r.Randevu.Islem.Fiyat)
-                }).ToList();
+                })
+                .OrderByDescending(x => x.RandevuSayisi) // En fazla randevu alan uzmanı sıralamak
+                .ToList();
 
+            // En çok randevu alınan uzman
+            var enCokRandevuAlinanUzman = uzmanRaporlari.FirstOrDefault();
+
+            // Raporu oluştur
             var rapor = new
             {
                 ToplamKazanc = toplamKazanc,
                 ToplamGelinenRandevu = toplamGelinenRandevu,
-                UzmanRaporlari = uzmanRaporlari
+                UzmanRaporlari = uzmanRaporlari,
+                EnCokRandevuAlinanUzman = enCokRandevuAlinanUzman // En çok randevu alınan uzmanı ekle
             };
 
             return View(rapor);
+        }
+        [HttpGet]
+        public async Task<IActionResult> UzmanGuncelle(int id)
+        {
+            var uzman = await _db.Uzmanlar
+                .Include(u => u.CalismaSaati)
+                .Include(u => u.UzmanlikAlani)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (uzman == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = await CreateUzmanViewModelAsync(uzman.UzmanlikAlaniId, uzman.CalismaSaatiId);
+            viewModel.Uzman = uzman;
+
+            return View(viewModel); // UzmanViewModel gönderiliyor
         }
 
         // Randevu durumu güncelleme
@@ -123,21 +151,22 @@ namespace HAIRDRESSER2.Controllers
         }
 
         // Randevu silme işlemi
-    
 
 
 
 
 
-[HttpGet]
-public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
-{
-    var islemler = await _db.Islemler
-                           .Where(i => i.UzmanlikAlaniId == id)
-                           .Select(i => new { i.Ad, i.Fiyat, i.Sure })
-                           .ToListAsync();
-    return Json(islemler);
-}
+        [HttpGet]
+        public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
+        {
+            var islemler = await _db.Islemler
+                                    .Where(i => i.UzmanlikAlaniId == id)
+                                    .Select(i => new { i.Ad, i.Fiyat, i.Sure })
+                                    .ToListAsync(); // Asenkron sorguyu tamamla
+
+            return Json(islemler);
+        }
+
         [HttpGet]
         public async Task<IActionResult> UzmanEkle()
         {
@@ -189,24 +218,13 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
             viewModel = await CreateUzmanViewModelAsync(viewModel.Uzman.UzmanlikAlaniId, viewModel.Uzman.CalismaSaatiId);
             return View(viewModel);
         }
-        [HttpGet]
-        public async Task<IActionResult> UzmanGuncelle(int id)
-        {
-            var uzman = await _db.Uzmanlar
-                .Include(u => u.CalismaSaati)
-                .Include(u => u.UzmanlikAlani)
-                .FirstOrDefaultAsync(u => u.Id == id);
+      
 
-            if (uzman == null)
-            {
-                return NotFound();
-            }
 
-            var viewModel = await CreateUzmanViewModelAsync(uzman.UzmanlikAlaniId, uzman.CalismaSaatiId);
-            viewModel.Uzman = uzman;
 
-            return View(viewModel); // UzmanViewModel gönderiliyor
-        }
+
+
+
 
 
         [HttpPut("api/uzmanlar/{id}")]
@@ -254,66 +272,40 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
         {
             try
             {
-                // İlgili uzmanı bulun
-                var uzman = await _db.Uzmanlar.FirstOrDefaultAsync(u => u.Id == id);
-
+                // Uzmanı bul
+                var uzman = await _db.Uzmanlar.Include(u => u.Islemler).FirstOrDefaultAsync(u => u.Id == id);
                 if (uzman == null)
                 {
                     TempData["ErrorMessage"] = "Uzman bulunamadı.";
                     return RedirectToAction("UzmanListesi");
                 }
 
-                // Uzman ile ilişkili randevuları bulun
-                var randevular = await _db.Randevular
-                                          .Where(r => r.UzmanId == id)
-                                          .ToListAsync();
-
-                // Uzman ile ilişkili randevuları sil
-                if (randevular.Any())
+                // Uzman ile ilişkili işlemleri kontrol et
+                if (uzman.Islemler != null && uzman.Islemler.Any())
                 {
-                    _db.Randevular.RemoveRange(randevular);
+                    // İlgili işlemlerin UzmanId değerini null yap
+                    foreach (var islem in uzman.Islemler)
+                    {
+                        islem.UzmanId = null;
+                    }
+
+                    // Değişiklikleri kaydet
+                    await _db.SaveChangesAsync();
                 }
 
                 // Uzmanı sil
                 _db.Uzmanlar.Remove(uzman);
-
-                // Veritabanına değişiklikleri kaydet
                 await _db.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Uzman ve ilişkili randevular başarıyla silindi.";
+                TempData["SuccessMessage"] = "Uzman başarıyla silindi. İlişkili işlemler korunarak uzmanla ilişkisi kaldırıldı.";
             }
             catch (Exception ex)
             {
-                // Hata durumunda loglama ve mesaj
                 _logger.LogError(ex, "Uzman silinirken bir hata oluştu.");
                 TempData["ErrorMessage"] = "Uzman silinirken bir hata oluştu. Lütfen tekrar deneyin.";
             }
 
             return RedirectToAction("UzmanListesi");
-        }
-
-        public async Task<IActionResult> UzmanDetay(int id)
-        {
-            var uzman = await _db.Uzmanlar
-                .Include(u => u.UzmanlikAlani) // Uzmanlık alanını dahil et
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (uzman == null)
-            {
-                return NotFound("Uzman bulunamadı.");
-            }
-
-            var randevular = await _db.Randevular
-                .Where(r => r.UzmanId == id)
-                .ToListAsync();
-
-            var viewModel = new UzmanViewModel
-            {
-                Uzman = uzman,
-                Randevular = randevular
-            };
-
-            return View(viewModel);
         }
 
 
@@ -329,7 +321,7 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
 
         [AllowAnonymous]
         [HttpGet]
-        
+
         public IActionResult Login() => View();
 
         [AllowAnonymous]
@@ -409,6 +401,27 @@ public async Task<IActionResult> GetIslemlerByUzmanlikAlani(int id)
 
             return RedirectToAction("Randevular");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> KullaniciListesi()
+        {
+            // Tüm kullanıcıları veritabanından al
+            var kullanicilar = await _userManager.Users
+                .Select(user => new
+                {
+                    user.Id,
+                    user.UserName,
+                    user.Email,
+                    user.Ad,
+                    user.Soyad
+                })
+                .ToListAsync();
+
+            return View(kullanicilar);
+        }
+
+
+
 
         private async Task<UzmanViewModel> CreateUzmanViewModelAsync(int? uzmanlikAlaniId = null, int? calismaSaatiId = null)
         {

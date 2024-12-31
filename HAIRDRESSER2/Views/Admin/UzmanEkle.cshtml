@@ -57,21 +57,52 @@
 
 <script>
     async function showIslemler() {
-        const uzmanlikAlaniId = document.getElementById('uzmanlikAlaniDropdown').value;
-        const islemlerListesi = document.getElementById('islemlerListesi');
+        const uzmanlikAlaniId = document.getElementById('uzmanlikAlaniDropdown').value; // Seçilen uzmanlık alanı ID'si
+        const islemlerListesi = document.getElementById('islemlerListesi'); // İşlemler listesinin yer alacağı DOM elemanı
 
-        islemlerListesi.innerHTML = ''; // Temizle
+        islemlerListesi.innerHTML = ''; // Listeyi temizle
 
-        if (uzmanlikAlaniId > 0) {
-            const response = await fetch(`/Admin/GetIslemlerByUzmanlikAlani/${uzmanlikAlaniId}`);
-            const islemler = await response.json();
+        if (uzmanlikAlaniId > 0) { // Geçerli bir uzmanlık alanı seçildiyse
+            try {
+                // API'ye GET isteği gönder
+                const response = await fetch(`/Admin/GetIslemlerByUzmanlikAlani/${uzmanlikAlaniId}`);
 
-            islemler.forEach(islem => {
+                // API'den gelen JSON yanıtını al
+                const islemler = await response.json();
+
+                // Eğer islemler boş değilse
+                if (islemler.length > 0) {
+                    islemler.forEach(islem => {
+                        // Her işlem için liste elemanı oluştur
+                        const li = document.createElement('li');
+                        li.textContent = `${islem.ad} - ${islem.fiyat} TL (${islem.sure} dakika)`;
+                        li.classList.add('list-group-item'); // Bootstrap sınıfı ile stil ekle
+                        islemlerListesi.appendChild(li); // Listeye ekle
+                    });
+                } else {
+                    // Eğer işlemler boşsa, kullanıcıya bilgi ver
+                    const li = document.createElement('li');
+                    li.textContent = "Bu uzmanlık alanında herhangi bir işlem bulunmamaktadır.";
+                    li.classList.add('list-group-item', 'text-danger');
+                    islemlerListesi.appendChild(li);
+                }
+            } catch (error) {
+                console.error('Hata oluştu:', error);
+                // Hata durumunda kullanıcıya bilgi ver
                 const li = document.createElement('li');
-                li.textContent = `${islem.ad} - ${islem.fiyat} TL (${islem.sure} dakika)`;
-                li.classList.add('list-group-item');
+                li.textContent = "İşlemler alınırken bir hata oluştu.";
+                li.classList.add('list-group-item', 'text-danger');
                 islemlerListesi.appendChild(li);
-            });
+            }
+        } else {
+            // Eğer uzmanlık alanı seçilmediyse, kullanıcıya bilgi ver
+            const li = document.createElement('li');
+            li.textContent = "Lütfen geçerli bir uzmanlık alanı seçin.";
+            li.classList.add('list-group-item', 'text-warning');
+            islemlerListesi.appendChild(li);
         }
     }
 </script>
+<div class="mt-3">
+    <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-secondary">Geri Dön</a>
+</div>

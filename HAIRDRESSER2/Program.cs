@@ -2,23 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Net.Http.Headers;
+using System.Net.Http;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        // OpenAI API Anahtarını yapılandırma
-        string openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-        builder.Services.AddHttpClient("OpenAIAPI", client =>
-        {
-            client.BaseAddress = new Uri("https://api.openai.com/v1/");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiApiKey);
-        });
-
-
 
         // Veritabanı yapılandırması
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -36,10 +26,21 @@ internal class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+        // IHttpClientFactory için HttpClient ekleniyor
+        builder.Services.AddHttpClient("RapidApiClient", client =>
+        {
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Add("X-RapidAPI-Key", builder.Configuration["RapidAPI:ApiKey"]);
+            client.DefaultRequestHeaders.Add("X-RapidAPI-Host", builder.Configuration["RapidAPI:ApiHost"]);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        // MVC ve Controller yapılandırması
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
+        // Geliştirme ortamı için hata sayfası
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
@@ -50,16 +51,22 @@ internal class Program
             app.UseDeveloperExceptionPage();
         }
 
+        // Middleware pipeline
         app.UseStaticFiles();
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Varsayılan rota
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
+        // Veritabanını tohumlama işlemi
         await SeedDatabaseAsync(app);
+
+        // Örnek bir istek gönderimi
+        await MakeRapidApiRequest(app.Services);
 
         app.Run();
     }
@@ -131,6 +138,34 @@ internal class Program
         else
         {
             Console.WriteLine("Admin kullanıcı zaten mevcut.");
+        }
+    }
+
+    private static async Task MakeRapidApiRequest(IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+        var clientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+        var client = clientFactory.CreateClient("RapidApiClient");
+
+        var requestUrl = "https://example.rapidapi.com/v1/endpoint"; // Tam URL
+
+        try
+        {
+            var response = await client.GetAsync(requestUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Başarılı: {content}");
+            }
+            else
+            {
+                Console.WriteLine($"Hata: {response.StatusCode} - {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Hata: {ex.Message}");
         }
     }
 }

@@ -15,11 +15,12 @@ namespace HAIRDRESSER2.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public KullaniciController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        public KullaniciController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _db = db;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Profil()
@@ -43,36 +44,14 @@ namespace HAIRDRESSER2.Controllers
 
             return View(kullanici);
         }
+
         [HttpPost]
-        public IActionResult UploadPhoto(IFormFile photo)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
         {
-            if (photo == null || photo.Length == 0)
-            {
-                TempData["Error"] = "Lütfen geçerli bir fotoğraf seçin.";
-                return RedirectToAction("Profil");
-            }
-
-            // Dosya adı oluşturma ve yolu belirleme
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads", fileName);
-
-            // Fotoğrafı kaydetme
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                photo.CopyTo(stream);
-            }
-
-            // Kullanıcı profilini güncelleme
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = _db.Users.FirstOrDefault(u => u.Id == userId);
-            if (user != null)
-            {
-              //  user.ProfilePhotoPath = fileName;
-                _db.SaveChanges();
-            }
-
-            TempData["Success"] = "Fotoğraf başarıyla yüklendi.";
-            return RedirectToAction("Profil");
+            await _signInManager.SignOutAsync();
+            TempData["SuccessMessage"] = "Oturum başarıyla kapatıldı.";
+            return RedirectToAction("Profil", "Kullanici");
         }
 
 
@@ -206,6 +185,9 @@ namespace HAIRDRESSER2.Controllers
 
             return RedirectToAction("Profil");
         }
+   
+
+
         //deneme
         protected override void Dispose(bool disposing)
         {

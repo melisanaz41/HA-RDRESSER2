@@ -7,6 +7,58 @@ html {
     font-size: 16px;
   }
 }
+/* wwwroot/css/style.css */
+
+/* Amblem görselinin yuvarlak çerçeve içinde ortalanmasý */
+.amblem-container {
+    position: fixed;
+    top: 20px; /* Üstten 20px mesafe */
+    right: 20px; /* Saðdan 20px mesafe */
+    z-index: 1000; /* Üst sýrada görünmesini saðlar */
+    border-radius: 50%; /* Yuvarlak kenarlar */
+    border: 8px solid #fff; /* Beyaz renkli çerçeve */
+    padding: 0; /* Çerçeve içindeki boþluklarý kaldýrdýk */
+    background-color: transparent; /* Arka plan rengini þeffaf yaptýk */
+    width: 150px; /* Çerçevenin geniþliði */
+    height: 150px; /* Çerçevenin yüksekliði */
+    display: flex; /* Flexbox kullanarak içeriði hizalar */
+    justify-content: center; /* Yatayda ortalar */
+    align-items: center; /* Dikeyde ortalar */
+    overflow: hidden; /* Çerçevenin dýþýna taþan görüntüleri gizler */
+}
+.center-image {
+    position: fixed;
+    top: 40px; /* Üstten 20px mesafe */
+    right: 60px; /* Saðdan 20px mesafe */
+    z-index: 1000; /* Üst sýrada görünmesini saðlar */
+    border-radius: 50%; /* Yuvarlak kenarlar */
+    border: 8px solid #fff; /* Beyaz renkli çerçeve */
+    padding: 0; /* Çerçeve içindeki boþluklarý kaldýrdýk */
+    background-color: transparent; /* Arka plan rengini þeffaf yaptýk */
+    width: 150px; /* Çerçevenin geniþliði */
+    height: 150px; /* Çerçevenin yüksekliði */
+    display: flex; /* Flexbox kullanarak içeriði hizalar */
+    justify-content: center; /* Yatayda ortalar */
+    align-items: center; /* Dikeyde ortalar */
+    overflow: hidden; /* Çerçevenin dýþýna taþan görüntüleri gizler */
+}
+
+/* Sayfa altýna fotoðraf eklemek için */
+.text-center img {
+    width: 100%; /* Fotoðrafýn geniþliðini sayfa geniþliðine göre ayarla */
+    max-width: 600px; /* Fotoðrafýn maksimum geniþliðini sýnýrlýyoruz */
+    height: auto; /* Yüksekliði otomatik olarak orantýlý ayarla */
+    border-radius: 10px; /* Yumuþak köþeler için yuvarlaklaþtýrma */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hafif bir gölge efekti ekledik */
+}
+
+
+.amblem {
+    width: 100%; /* Görselin çerçeveye tam olarak sýðmasýný saðlarýz */
+    height: 100%; /* Görselin çerçeveye tam olarak sýðmasýný saðlarýz */
+    object-fit: cover; /* Görseli kesmeden, orantýlý bir þekilde sýðdýrýr */
+}
+
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;

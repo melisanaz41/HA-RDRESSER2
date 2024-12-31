@@ -82,6 +82,7 @@ namespace HAIRDRESSER2.Controllers
             return View();
         }
 
+
         // POST: Login
         [HttpPost]
         [AllowAnonymous]
@@ -94,6 +95,7 @@ namespace HAIRDRESSER2.Controllers
             }
 
             // Kullanıcıyı email ile bul
+
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {

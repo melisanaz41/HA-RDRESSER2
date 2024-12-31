@@ -1,10 +1,14 @@
 ﻿@model dynamic
 
-<h2>Raporlama</h2>
+<h2 class="text-center mb-4">Raporlama</h2>
 
-<p><strong>Toplam Kazanç:</strong> @Model.ToplamKazanc.ToString("C")</p>
-<p><strong>Toplam Gelinen Randevu Sayısı:</strong> @Model.ToplamGelinenRandevu</p>
+<!-- Toplam Kazanç ve Gelinen Randevu Sayısı -->
+<div class="mb-3">
+    <p><strong>Toplam Kazanç:</strong> @Model.ToplamKazanc.ToString("C")</p>
+    <p><strong>Toplam Gelinen Randevu Sayısı:</strong> @Model.ToplamGelinenRandevu</p>
+</div>
 
+<!-- Uzman Bazlı Rapor Tablosu -->
 <h3>Uzman Bazlı Rapor</h3>
 <table class="table table-bordered">
     <thead>
@@ -25,3 +29,8 @@
         }
     </tbody>
 </table>
+
+<!-- Geri Dön Butonu -->
+<div class="mt-3">
+    <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-secondary">Geri Dön</a>
+</div>

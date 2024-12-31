@@ -1,111 +1,118 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-[ApiController]
-[Route("api/[controller]")]
-public class RecommendationController : ControllerBase
+namespace HAIRDRESSER2.Controllers
 {
-    private readonly HttpClient _httpClient;
-
-    public RecommendationController(IHttpClientFactory httpClientFactory)
+    [Authorize]
+    public class APIController : Controller
     {
-        _httpClient = httpClientFactory.CreateClient("OpenAIAPI");
-    }
+        private const string ApiUrl = "https://hairstyle-changer.p.rapidapi.com/huoshan/facebody/hairstyle";
+        private const string ApiKey = "d14eab899fmshd4c76103567a7b6p1df4a8jsn75df29571215";
+        private const string ApiHost = "hairstyle-changer.p.rapidapi.com";
 
-    [HttpPost("GetHairStyleRecommendation")]
-    public async Task<IActionResult> GetHairStyleRecommendation([FromBody] HairStyleRequestModel request)
-    {
-        if (string.IsNullOrEmpty(request.PhotoBase64))
+        public IActionResult Index()
         {
-            return BadRequest(new { Message = "Fotoğraf verisi boş." });
+            // Saç stillerini GetHairStyles metodundan alıyoruz
+            ViewBag.HairStyles = GetHairStyles();
+            return View();
         }
 
-        try
+        // Resmi işleyen ve API'ye gönderen metod
+        [HttpPost]
+        public IActionResult ProcessImage(IFormFile uploadedImage, string style)
         {
-            // Kullanıcının girdisi ile OpenAI'ye prompt oluşturma
-            var userPrompt = "Based on the user's preferences and hairstyle needs, provide hairstyle recommendations.";
-            var apiResult = await CallOpenAIAPI(userPrompt);
-
-            // Başarılı API yanıtı
-            return Ok(new { Message = "Başarılı", Recommendations = apiResult });
-        }
-        catch (Exception ex)
-        {
-            // Hata detaylarını loglama
-            Debug.WriteLine($"Hata: {ex.Message}");
-            return StatusCode(500, new { Message = "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.", Error = ex.Message });
-        }
-    }
-
-    private async Task<List<string>> CallOpenAIAPI(string prompt)
-    {
-        var requestBody = new
-        {
-            model = "gpt-4",
-            messages = new[]
+            if (uploadedImage == null || uploadedImage.Length == 0)
             {
-            new { role = "system", content = "You are a professional hairstylist assistant." },
-            new { role = "user", content = prompt }
-        },
-            max_tokens = 100,
-            temperature = 0.7
-        };
-
-        var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        try
-        {
-            Debug.WriteLine("API isteği gönderiliyor...");
-            Debug.WriteLine($"Request Body: {json}");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-
-            Debug.WriteLine($"HTTP Durum Kodu: {response.StatusCode}");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"API Hata Detayı: {errorDetails}");
-                throw new Exception($"API isteği başarısız oldu: {response.StatusCode} - {response.ReasonPhrase}");
+                TempData["ErrorMessage"] = "Lütfen bir fotoğraf yükleyin.";
+                return RedirectToAction("Index");
             }
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"API Yanıtı: {responseContent}");
+            try
+            {
+                // Resmi byte array'e çevirme
+                byte[] imageBytes;
+                using (var memoryStream = new MemoryStream())
+                {
+                    uploadedImage.CopyTo(memoryStream);
+                    imageBytes = memoryStream.ToArray();
+                }
 
-            var result = JsonSerializer.Deserialize<OpenAIResponse>(responseContent);
-            return result?.Choices.Select(choice => choice.Message.Content).ToList() ?? new List<string>();
+                // API isteği oluşturma ve gönderme
+                var response = SendApiRequest(imageBytes, uploadedImage.FileName, style);
+
+                if (response.IsSuccessful)
+                {
+                    var responseData = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                    string base64Image = responseData?.data?.image;
+
+                    if (!string.IsNullOrEmpty(base64Image))
+                    {
+                        // İşlenmiş resim Base64 formatında döndü
+                        ViewBag.ProcessedImage = $"data:image/png;base64,{base64Image}";
+                        return View("Result");
+                    }
+
+                    TempData["ErrorMessage"] = "İşlenmiş resim alınamadı.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Resim işleme başarısız!. Hata: {response.Content}";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Bir hata oluştu: {ex.Message}";
+            }
+
+            return RedirectToAction(",,");
         }
-        catch (Exception ex)
+
+        private RestResponse SendApiRequest(byte[] imageBytes, string fileName, string style)
         {
-            Debug.WriteLine($"OpenAI API çağrısı sırasında hata oluştu: {ex.Message}");
-            throw;
+            var client = new RestClient(ApiUrl);
+            var request = new RestRequest
+            {
+                Method = Method.Post
+            };
+            request.AddHeader("x-rapidapi-key", ApiKey);
+            request.AddHeader("x-rapidapi-host", ApiHost);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            // Resmi ve stil türünü API'ye gönderiyoruz
+            request.AddFile("image_target", imageBytes, fileName);
+            request.AddParameter("hair_type", style);
+
+            return client.Execute(request);
         }
-    }
 
-
-    // İstek model sınıfı
-    public class HairStyleRequestModel
-    {
-        public string PhotoBase64 { get; set; }
-    }
-
-    // OpenAI API Yanıt Modeli
-    public class OpenAIResponse
-    {
-        public List<Choice> Choices { get; set; }
-    }
-
-    public class Choice
-    {
-        public Message Message { get; set; }
-    }
-
-    public class Message
-    {
-        public string Content { get; set; }
+        // Saç stillerini döndüren metod
+        private Dictionary<int, string> GetHairStyles()
+        {
+            return new Dictionary<int, string>
+            {
+                { 101, "Kakül (Varsayılan)" },
+                { 201, "Uzun Saç" },
+                { 301, "Kakül + Uzun Saç" },
+                { 401, "Orta Uzunlukta Saç" },
+                { 402, "Hafif Saç Artışı" },
+                { 403, "Yoğun Saç Artışı" },
+                { 502, "Hafif Kıvırcık" },
+                { 503, "Yoğun Kıvırcık" },
+                { 603, "Kısa Saç" },
+                { 801, "Sarı Saç" },
+                { 901, "Düz Saç" },
+                { 1001, "Yağsız Saç" },
+                { 1101, "Saç Çizgisi Dolgusu" },
+                { 1201, "Düzgün Saç" },
+                { 1301, "Saç Boşluklarını Doldurma" }
+            };
+        }
     }
 }

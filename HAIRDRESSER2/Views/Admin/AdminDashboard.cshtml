@@ -1,34 +1,74 @@
-﻿<h2>Admin Dashboard</h2>
-<p>Merhaba, @User.Identity.Name! Hoş geldiniz.</p>
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
 
-<h2>Admin Paneli</h2>
-<p>Hoş geldiniz! Buradan sistemle ilgili işlemleri yönetebilirsiniz.</p>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sol Kısım: İçerik -->
+        <div class="col-md-8">
+            <h2>Admin Dashboard</h2>
+            <p>Merhaba, @User.Identity.Name! Hoş geldiniz.</p>
 
-<div class="mt-4">
-    <!-- Mevcut Randevuları Görüntüle -->
-    <a asp-action="Randevular" asp-controller="Admin" class="btn btn-secondary">Mevcut Randevuları Görüntüle</a>
+            <h2>Admin Paneli</h2>
+            <p>Hoş geldiniz! Buradan sistemle ilgili işlemleri yönetebilirsiniz.</p>
+
+            <div class="mt-4">
+                <!-- Mevcut Randevuları Görüntüle -->
+                <a asp-action="Randevular" asp-controller="Admin" class="btn btn-secondary">Mevcut Randevuları Görüntüle</a>
+            </div>
+
+            <div class="mt-4">
+                <!-- Gelinen Randevuları Görüntüle -->
+                <a asp-action="GelinenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinen Randevuları Görüntüle</a>
+            </div>
+
+            <div class="mt-4">
+                <!-- Raporlama -->
+                <a asp-action="Raporlama" asp-controller="Admin" class="btn btn-secondary">Raporlama ve Analiz</a>
+            </div>
+
+            <div class="mt-4">
+                <!-- Uzman Yönetimi -->
+                <a asp-action="UzmanListesi" asp-controller="Admin" class="btn btn-secondary">Uzmanları Yönet</a>
+            </div>
+
+            <div class="mt-4">
+                <!-- Gelinen ve Gelinmeyen Randevular -->
+                <a asp-action="GelinmeyenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinmeyen Randevuları Görüntüle</a>
+            </div>
+
+            <div class="mt-4">
+                <a asp-action="KullaniciListesi" asp-controller="Admin" class="btn btn-secondary">Kullanıcıları Görüntüle</a>
+            </div>
+
+
+            <form asp-action="Logout" method="post" style="margin-top: 20px;">
+                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+            </form>
+        </div>
+
+        <!-- Sağ Kısım: Fotoğraf -->
+        <div class="col-md-4 text-center d-flex align-items-center justify-content-center">
+            <div class="admin-photo">
+                <img src="~/images/admin.jpg" alt="Admin Fotoğrafı" class="rounded-circle img-thumbnail">
+                <p class="mt-3">Admin</p>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="mt-4">
-    <!-- Gelinen Randevuları Görüntüle -->
-    <a asp-action="GelinenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinen Randevuları Görüntüle</a>
-</div>
+<style>
+    .admin-photo img {
+        max-width: 200px; /* Fotoğrafın genişliği artırıldı */
+        height: auto;
+        border: 4px solid #ddd; /* Kenarlık kalınlığı artırıldı */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge eklendi */
+    }
 
-<div class="mt-4">
-    <!-- Raporlama -->
-    <a asp-action="Raporlama" asp-controller="Admin" class="btn btn-secondary">Raporlama ve Analiz</a>
-</div>
-
-<div class="mt-4">
-    <!-- Uzman Yönetimi -->
-    <a asp-action="UzmanListesi" asp-controller="Admin" class="btn btn-secondary">Uzmanları Yönet</a>
-</div>
-
-<div class="mt-4">
-    <!-- Gelinen ve Gelinmeyen Randevular -->
-    <a asp-action="GelinmeyenRandevular" asp-controller="Admin" class="btn btn-secondary">Gelinmeyen Randevuları Görüntüle</a>
-</div>
-
-<form asp-action="Logout" method="post" style="margin-top: 20px;">
-    <button type="submit" class="btn btn-danger">Çıkış Yap</button>
-</form>
+    .admin-photo p {
+        font-size: 1.4rem; /* Yazı boyutu artırıldı */
+        font-weight: bold;
+        color: #333; /* Yazı rengi koyulaştırıldı */
+        margin-top: 10px; /* Fotoğraf ile yazı arasına boşluk eklendi */
+    }
+</style>
